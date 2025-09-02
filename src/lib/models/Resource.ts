@@ -3,14 +3,14 @@ import mongoose, { type Document, Schema } from 'mongoose';
 export interface IResource extends Document {
         title: string;
         description: string;
-        content: string;
-        category: 'anxiety' | 'depression' | 'stress' | 'self-care' | 'academic' | 'relationships' | 'crisis';
-        type: 'article' | 'video' | 'audio' | 'exercise' | 'tool' | 'external';
+        category: string;
+        type: 'article' | 'video' | 'exercise' | 'meditation' | 'tool';
+        duration: number; // in minutes
         url?: string;
-        isPublished: boolean;
-        createdBy: mongoose.Types.ObjectId;
-        views: number;
-        likes: number;
+        content?: string;
+        tags: string[];
+        featured: boolean;
+
         createdAt: Date;
         updatedAt: Date;
 }
@@ -21,54 +21,53 @@ const ResourceSchema = new Schema<IResource>(
                         type: String,
                         required: true,
                         trim: true,
-                        maxlength: 200,
                 },
                 description: {
                         type: String,
                         required: true,
                         trim: true,
-                        maxlength: 500,
-                },
-                content: {
-                        type: String,
-                        required: true,
+                        maxlength: 1000,
                 },
                 category: {
                         type: String,
                         required: true,
-                        enum: ['anxiety', 'depression', 'stress', 'self-care', 'academic', 'relationships', 'crisis'],
+                        enum: [
+                                'Stress Management',
+                                'Anxiety Support',
+                                'Depression Help',
+                                'Self-Care',
+                                'Academic Pressure',
+                                'Relationships',
+                        ],
                 },
                 type: {
                         type: String,
                         required: true,
-                        enum: ['article', 'video', 'audio', 'exercise', 'tool', 'external'],
+                        enum: ['article', 'video', 'exercise', 'meditation', 'tool'],
+                },
+                duration: {
+                        type: Number,
+                        default: 5,
+                        min: 1,
                 },
                 url: {
                         type: String,
-                        validate: {
-                                validator: (v: string) => {
-                                        if (!v) return true; // URL is optional
-                                        return /^https?:\/\/.+/.test(v);
-                                },
-                                message: 'URL must be a valid HTTP/HTTPS URL',
-                        },
+                        trim: true,
                 },
-                isPublished: {
+                content: {
+                        type: String,
+                        trim: true,
+                        maxlength: 10000,
+                },
+                tags: [
+                        {
+                                type: String,
+                                trim: true,
+                        },
+                ],
+                featured: {
                         type: Boolean,
                         default: false,
-                },
-                createdBy: {
-                        type: Schema.Types.ObjectId,
-                        ref: 'User',
-                        required: true,
-                },
-                views: {
-                        type: Number,
-                        default: 0,
-                },
-                likes: {
-                        type: Number,
-                        default: 0,
                 },
         },
         {
@@ -77,10 +76,9 @@ const ResourceSchema = new Schema<IResource>(
 );
 
 // Create indexes for better performance
-ResourceSchema.index({ category: 1, isPublished: 1 });
-ResourceSchema.index({ type: 1, isPublished: 1 });
-ResourceSchema.index({ createdBy: 1 });
+ResourceSchema.index({ category: 1 });
+ResourceSchema.index({ featured: 1 });
+ResourceSchema.index({ type: 1 });
 ResourceSchema.index({ createdAt: -1 });
-ResourceSchema.index({ isPublished: 1, createdAt: -1 });
 
 export default mongoose.models.Resource || mongoose.model<IResource>('Resource', ResourceSchema);

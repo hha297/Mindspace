@@ -56,7 +56,6 @@ const handler = NextAuth({
                                                 throw new Error('Invalid password');
                                         }
 
-                                        console.log('Authentication successful for:', credentials.email);
                                         return {
                                                 id: user._id.toString(),
                                                 email: user.email,
@@ -98,6 +97,21 @@ const handler = NextAuth({
                                 token.role = user.role;
                                 token.name = user.name;
                                 token.email = user.email;
+                        }
+
+                        // Always get fresh user data from database
+                        if (token?.email) {
+                                try {
+                                        await connectDB();
+                                        const dbUser = await User.findOne({ email: token.email });
+                                        if (dbUser) {
+                                                token.role = dbUser.role;
+                                                token.name = dbUser.name;
+                                                token.email = dbUser.email;
+                                        }
+                                } catch (error) {
+                                        console.error('Error fetching user data in JWT:', error);
+                                }
                         }
 
                         // Handle session update

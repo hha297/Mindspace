@@ -32,7 +32,19 @@ export async function GET(request: NextRequest) {
                         .sort({ createdAt: -1 })
                         .limit(limit);
 
-                return NextResponse.json({ moods });
+                // Transform data to match component expectations
+                const transformedMoods = moods.map((mood) => ({
+                        _id: mood._id,
+                        userId: mood.userId,
+                        mood: mood.moodLabel,
+                        moodScore: mood.mood,
+                        note: mood.notes,
+                        tags: mood.tags,
+                        createdAt: mood.createdAt,
+                        updatedAt: mood.updatedAt,
+                }));
+
+                return NextResponse.json({ moods: transformedMoods });
         } catch (error) {
                 console.error('Error fetching moods:', error);
                 return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -46,10 +58,10 @@ export async function POST(request: NextRequest) {
                         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
                 }
 
-                const { mood, rating, notes, tags } = await request.json();
+                const { mood, moodScore, note, tags } = await request.json();
 
-                if (!mood || rating === undefined) {
-                        return NextResponse.json({ error: 'Mood and rating are required' }, { status: 400 });
+                if (!mood || moodScore === undefined) {
+                        return NextResponse.json({ error: 'Mood and moodScore are required' }, { status: 400 });
                 }
 
                 await connectDB();
@@ -62,9 +74,9 @@ export async function POST(request: NextRequest) {
                 // Create mood log
                 const moodLog = await MoodLog.create({
                         userId: user._id,
-                        mood,
-                        rating,
-                        notes: notes || '',
+                        mood: moodScore,
+                        moodLabel: mood,
+                        notes: note || '',
                         tags: tags || [],
                 });
 
