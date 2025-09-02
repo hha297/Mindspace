@@ -19,8 +19,13 @@ const fontSecondary = Space_Mono({
 });
 
 export const metadata: Metadata = {
-        title: 'Mindspace',
-        description: 'Calming mental health platform',
+        title: 'MindSpace',
+        description: 'Your mental health companion - track mood, access resources, and find support',
+        icons: {
+                icon: '/logo.png',
+                shortcut: '/logo.png',
+                apple: '/logo.png',
+        },
 };
 
 export default function RootLayout({

@@ -6,6 +6,7 @@ export interface IUser extends Document {
         password?: string;
         provider: 'email' | 'google' | 'github';
         image?: string;
+        role: 'user' | 'admin';
         streakCount: number;
         badges: string[];
         lastMoodLog?: Date;
@@ -35,6 +36,11 @@ const UserSchema = new Schema<IUser>(
                         type: String,
                         enum: ['email', 'google', 'github'],
                         default: 'email',
+                },
+                role: {
+                        type: String,
+                        enum: ['user', 'admin'],
+                        default: 'user',
                 },
                 image: {
                         type: String,
