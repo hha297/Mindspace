@@ -49,7 +49,7 @@ export default function HomePage() {
                 <div className="min-h-screen bg-background">
                         <Navbar />
 
-                        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <main className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
                                 <div className="py-8">
                                         <EmergencyBanner />
 
@@ -78,7 +78,7 @@ export default function HomePage() {
                                         </div>
 
                                         {/* Quick Help Section */}
-                                        <div className="py-16 bg-muted/30 rounded-2xl mb-16">
+                                        <div className="py-16 bg-muted rounded-2xl mb-16">
                                                 <div className="max-w-4xl mx-auto px-6">
                                                         <h2 className="text-3xl font-bold text-center mb-8 text-balance">
                                                                 Need Help Right Now?

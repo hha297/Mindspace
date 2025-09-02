@@ -41,33 +41,47 @@ export default function DashboardPage() {
                 }
         }, [status, router]);
 
+        // Listen for mood logged events
+        useEffect(() => {
+                const handleMoodLogged = () => {
+                        fetchUserStats();
+                };
+
+                window.addEventListener('mood-logged', handleMoodLogged);
+                return () => {
+                        window.removeEventListener('mood-logged', handleMoodLogged);
+                };
+        }, []);
+
         const fetchUserStats = async () => {
                 try {
-                        const [userResponse, moodResponse] = await Promise.all([
+                        const [userResponse, moodResponse, badgesResponse] = await Promise.all([
                                 fetch('/api/user/profile'),
-                                fetch('/api/moods?limit=100'),
+                                fetch('/api/mood?limit=100'),
+                                fetch('/api/user/achievements'),
                         ]);
 
-                        if (userResponse.ok && moodResponse.ok) {
+                        if (userResponse.ok && moodResponse.ok && badgesResponse.ok) {
                                 const userData = await userResponse.json();
                                 const moodData = await moodResponse.json();
+                                const badgesData = await badgesResponse.json();
 
-                                if (!moodData.moodLogs) {
+                                if (!moodData.moods) {
                                         return;
                                 }
 
                                 const averageMood =
-                                        moodData.moodLogs.length > 0
-                                                ? moodData.moodLogs.reduce(
+                                        moodData.moods.length > 0
+                                                ? moodData.moods.reduce(
                                                           (acc: number, log: any) => acc + log.moodScore,
                                                           0,
-                                                  ) / moodData.moodLogs.length
+                                                  ) / moodData.moods.length
                                                 : 0;
 
                                 setUserStats({
                                         streakCount: userData.user.streakCount || 0,
-                                        badges: userData.user.badges || [],
-                                        totalMoodLogs: moodData.moodLogs.length,
+                                        badges: badgesData.badges || [],
+                                        totalMoodLogs: moodData.moods.length,
                                         averageMood: averageMood || 0,
                                 });
                         }
@@ -98,7 +112,7 @@ export default function DashboardPage() {
                 return (
                         <div className="min-h-screen bg-background">
                                 <Navbar />
-                                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                                <main className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                                         <div className="space-y-6">
                                                 <Skeleton className="h-8 w-64" />
                                                 <div className="grid md:grid-cols-4 gap-4">
@@ -136,7 +150,7 @@ export default function DashboardPage() {
                 <div className="min-h-screen bg-background">
                         <Navbar />
 
-                        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <main className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                                 <EmergencyBanner />
 
                                 {/* Welcome Section */}

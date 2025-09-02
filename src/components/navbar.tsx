@@ -5,7 +5,13 @@ import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Home, BarChart3, BookOpen, Wrench, Menu, X, LogOut, User, Settings } from 'lucide-react';
+import {
+        DropdownMenu,
+        DropdownMenuContent,
+        DropdownMenuItem,
+        DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Home, BarChart3, BookOpen, Wrench, Menu, X, LogOut, User, Settings, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 
 export function Navbar() {
@@ -52,8 +58,7 @@ export function Navbar() {
                 };
         }, [update, session]);
 
-        // TODO: Add admin link if user is admin
-
+        // Add admin link if user is admin
         const navigation = [
                 { name: 'Home', href: '/', icon: Home },
                 { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
@@ -63,7 +68,7 @@ export function Navbar() {
 
         return (
                 <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border sticky top-0 z-50">
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
                                 <div className="flex justify-between h-16">
                                         <div className="flex items-center">
                                                 <Link href="/" className="flex items-center space-x-2">
@@ -84,20 +89,74 @@ export function Navbar() {
                                         </div>
 
                                         {/* Desktop Navigation */}
-                                        <div className="hidden md:flex items-center space-x-8">
+                                        <div className="hidden md:flex items-center space-x-2">
                                                 {navigation.map((item) => {
                                                         const Icon = item.icon;
                                                         return (
                                                                 <Link
                                                                         key={item.name}
                                                                         href={item.href}
-                                                                        className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                                                                        className="flex items-center space-x-1 px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:bg-primary hover:text-white transition-colors"
                                                                 >
                                                                         <Icon className="h-4 w-4" />
                                                                         <span>{item.name}</span>
                                                                 </Link>
                                                         );
                                                 })}
+
+                                                {/* Admin Dropdown */}
+                                                {session?.user.role === 'admin' && (
+                                                        <DropdownMenu>
+                                                                <DropdownMenuTrigger asChild>
+                                                                        <Button
+                                                                                variant="ghost"
+                                                                                className="flex items-center space-x-1 text-sm font-medium hover:bg-primary text-muted-foreground hover:text-white transition-colors"
+                                                                        >
+                                                                                <Settings className="h-4 w-4" />
+                                                                                <span>Admin</span>
+                                                                                <ChevronDown className="h-4 w-4" />
+                                                                        </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent align="end">
+                                                                        <DropdownMenuItem asChild>
+                                                                                <Link
+                                                                                        href="/admin"
+                                                                                        className="flex items-center space-x-2 cursor-pointer"
+                                                                                >
+                                                                                        <BarChart3 className="h-4 w-4 hover:text-white" />
+                                                                                        <span>Dashboard</span>
+                                                                                </Link>
+                                                                        </DropdownMenuItem>
+                                                                        <DropdownMenuItem asChild>
+                                                                                <Link
+                                                                                        href="/admin/analytics"
+                                                                                        className="flex items-center space-x-2 cursor-pointer"
+                                                                                >
+                                                                                        <BarChart3 className="h-4 w-4 hover:text-white" />
+                                                                                        <span>Analytics</span>
+                                                                                </Link>
+                                                                        </DropdownMenuItem>
+                                                                        <DropdownMenuItem asChild>
+                                                                                <Link
+                                                                                        href="/admin/resources"
+                                                                                        className="flex items-center space-x-2 cursor-pointer"
+                                                                                >
+                                                                                        <BookOpen className="h-4 w-4 hover:text-white" />
+                                                                                        <span>Resources</span>
+                                                                                </Link>
+                                                                        </DropdownMenuItem>
+                                                                        <DropdownMenuItem asChild>
+                                                                                <Link
+                                                                                        href="/admin/settings"
+                                                                                        className="flex items-center space-x-2 cursor-pointer"
+                                                                                >
+                                                                                        <Settings className="h-4 w-4 hover:text-white" />
+                                                                                        <span>Settings</span>
+                                                                                </Link>
+                                                                        </DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                )}
                                         </div>
 
                                         {/* Desktop Auth Buttons */}
@@ -180,7 +239,7 @@ export function Navbar() {
                                                                         <Link
                                                                                 key={item.name}
                                                                                 href={item.href}
-                                                                                className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors"
+                                                                                className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-muted-foreground hover:text-white hover:bg-primary rounded-md transition-colors"
                                                                                 onClick={() => setIsMenuOpen(false)}
                                                                         >
                                                                                 <Icon className="h-5 w-5" />
@@ -189,11 +248,52 @@ export function Navbar() {
                                                                 );
                                                         })}
 
+                                                        {/* Mobile Admin Links */}
+                                                        {session?.user.role === 'admin' && (
+                                                                <div className="space-y-1">
+                                                                        <div className="px-3 py-2 text-sm font-medium text-muted-foreground">
+                                                                                Admin
+                                                                        </div>
+                                                                        <Link
+                                                                                href="/admin"
+                                                                                onClick={() => setIsMenuOpen(false)}
+                                                                                className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-muted-foreground hover:text-white hover:bg-primary rounded-md transition-colors"
+                                                                        >
+                                                                                <BarChart3 className="h-5 w-5" />
+                                                                                <span>Dashboard</span>
+                                                                        </Link>
+                                                                        <Link
+                                                                                href="/admin/analytics"
+                                                                                onClick={() => setIsMenuOpen(false)}
+                                                                                className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-muted-foreground hover:text-white hover:bg-primary rounded-md transition-colors"
+                                                                        >
+                                                                                <BarChart3 className="h-5 w-5" />
+                                                                                <span>Analytics</span>
+                                                                        </Link>
+                                                                        <Link
+                                                                                href="/admin/resources"
+                                                                                onClick={() => setIsMenuOpen(false)}
+                                                                                className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-muted-foreground hover:text-white hover:bg-primary rounded-md transition-colors"
+                                                                        >
+                                                                                <BookOpen className="h-5 w-5" />
+                                                                                <span>Resources</span>
+                                                                        </Link>
+                                                                        <Link
+                                                                                href="/admin/settings"
+                                                                                onClick={() => setIsMenuOpen(false)}
+                                                                                className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-muted-foreground hover:text-white hover:bg-primary rounded-md transition-colors"
+                                                                        >
+                                                                                <Settings className="h-5 w-5" />
+                                                                                <span>Settings</span>
+                                                                        </Link>
+                                                                </div>
+                                                        )}
+
                                                         {/* Mobile Auth Section */}
                                                         <div className="pt-4 border-t border-border">
                                                                 {session ? (
                                                                         <div className="space-y-2">
-                                                                                <div className="px-3 py-2 text-sm text-muted-foreground flex items-center space-x-2">
+                                                                                <div className="px-1 py-2 text-sm text-muted-foreground flex items-center space-x-2">
                                                                                         {session.user?.image ? (
                                                                                                 <Image
                                                                                                         src={
@@ -202,12 +302,12 @@ export function Navbar() {
                                                                                                                         .image
                                                                                                         }
                                                                                                         alt="Profile"
-                                                                                                        className="h-5 w-5 rounded-full"
-                                                                                                        width={20}
-                                                                                                        height={20}
+                                                                                                        className="size-8 rounded-full"
+                                                                                                        width={32}
+                                                                                                        height={32}
                                                                                                 />
                                                                                         ) : (
-                                                                                                <User className="h-4 w-4" />
+                                                                                                <User className="size-5" />
                                                                                         )}
                                                                                         <span>
                                                                                                 Signed in as{' '}
@@ -229,7 +329,7 @@ export function Navbar() {
                                                                                                 size="sm"
                                                                                                 className="w-full justify-start"
                                                                                         >
-                                                                                                <Settings className="h-4 w-4 mr-2" />
+                                                                                                <Settings className="size-5 mr-2" />
                                                                                                 Profile
                                                                                         </Button>
                                                                                 </Link>
@@ -248,7 +348,7 @@ export function Navbar() {
                                                                                         size="sm"
                                                                                         className="w-full justify-start"
                                                                                 >
-                                                                                        <LogOut className="h-4 w-4 mr-2" />
+                                                                                        <LogOut className="size-5 mr-2" />
                                                                                         Sign Out
                                                                                 </Button>
                                                                         </div>
