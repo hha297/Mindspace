@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { EmergencyBanner } from '@/components/emergency-banner';
-import { Chrome, Github, UserPlus, Upload } from 'lucide-react';
+import { Chrome, Github, UserPlus, Upload, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 
@@ -21,6 +21,10 @@ export default function SignUpPage() {
         const [email, setEmail] = useState('');
         const [password, setPassword] = useState('');
         const [confirmPassword, setConfirmPassword] = useState('');
+        const [showPasswords, setShowPasswords] = useState({
+                password: false,
+                confirm: false,
+        });
         const [image, setImage] = useState('');
         const [isLoading, setIsLoading] = useState(false);
         const [isUploading, setIsUploading] = useState(false);
@@ -167,7 +171,7 @@ export default function SignUpPage() {
                                 });
                         } else {
                                 toast.success('Welcome to MindSpace!', {
-                                        description: 'Your account has been created successfully.',
+                                        description: 'Your account has been created.',
                                 });
                                 router.push('/dashboard');
                         }
@@ -343,36 +347,88 @@ export default function SignUpPage() {
                                                                 </div>
                                                                 <div className="space-y-2">
                                                                         <Label htmlFor="password">Password</Label>
-                                                                        <Input
-                                                                                id="password"
-                                                                                type="password"
-                                                                                placeholder="Create a password (min. 6 characters)"
-                                                                                value={password}
-                                                                                onChange={(e) =>
-                                                                                        setPassword(e.target.value)
-                                                                                }
-                                                                                required
-                                                                                minLength={6}
-                                                                                className="bg-white border-primary/50"
-                                                                        />
+                                                                        <div className="relative">
+                                                                                <Input
+                                                                                        id="password"
+                                                                                        type={
+                                                                                                showPasswords.password
+                                                                                                        ? 'text'
+                                                                                                        : 'password'
+                                                                                        }
+                                                                                        placeholder="Create a password (min. 6 characters)"
+                                                                                        value={password}
+                                                                                        onChange={(e) =>
+                                                                                                setPassword(
+                                                                                                        e.target.value,
+                                                                                                )
+                                                                                        }
+                                                                                        required
+                                                                                        minLength={6}
+                                                                                        className="bg-white border-primary/50 pr-10"
+                                                                                />
+                                                                                <Button
+                                                                                        type="button"
+                                                                                        variant="ghost"
+                                                                                        size="sm"
+                                                                                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                                                                                        tabIndex={-1}
+                                                                                        onClick={() =>
+                                                                                                setShowPasswords({
+                                                                                                        ...showPasswords,
+                                                                                                        password: !showPasswords.password,
+                                                                                                })
+                                                                                        }
+                                                                                >
+                                                                                        {showPasswords.password ? (
+                                                                                                <EyeOff className="h-4 w-4 hover:text-primary" />
+                                                                                        ) : (
+                                                                                                <Eye className="h-4 w-4 hover:text-primary" />
+                                                                                        )}
+                                                                                </Button>
+                                                                        </div>
                                                                 </div>
                                                                 <div className="space-y-2">
                                                                         <Label htmlFor="confirmPassword">
                                                                                 Confirm Password
                                                                         </Label>
-                                                                        <Input
-                                                                                id="confirmPassword"
-                                                                                type="password"
-                                                                                placeholder="Confirm your password"
-                                                                                value={confirmPassword}
-                                                                                onChange={(e) =>
-                                                                                        setConfirmPassword(
-                                                                                                e.target.value,
-                                                                                        )
-                                                                                }
-                                                                                required
-                                                                                className="bg-white border-primary/50"
-                                                                        />
+                                                                        <div className="relative">
+                                                                                <Input
+                                                                                        id="confirmPassword"
+                                                                                        type={
+                                                                                                showPasswords.confirm
+                                                                                                        ? 'text'
+                                                                                                        : 'password'
+                                                                                        }
+                                                                                        placeholder="Confirm your password"
+                                                                                        value={confirmPassword}
+                                                                                        onChange={(e) =>
+                                                                                                setConfirmPassword(
+                                                                                                        e.target.value,
+                                                                                                )
+                                                                                        }
+                                                                                        required
+                                                                                        className="bg-white border-primary/50 pr-10"
+                                                                                />
+                                                                                <Button
+                                                                                        type="button"
+                                                                                        variant="ghost"
+                                                                                        size="sm"
+                                                                                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                                                                                        tabIndex={-1}
+                                                                                        onClick={() =>
+                                                                                                setShowPasswords({
+                                                                                                        ...showPasswords,
+                                                                                                        confirm: !showPasswords.confirm,
+                                                                                                })
+                                                                                        }
+                                                                                >
+                                                                                        {showPasswords.confirm ? (
+                                                                                                <EyeOff className="h-4 w-4 hover:text-primary" />
+                                                                                        ) : (
+                                                                                                <Eye className="h-4 w-4 hover:text-primary" />
+                                                                                        )}
+                                                                                </Button>
+                                                                        </div>
                                                                 </div>
                                                                 <Button
                                                                         type="submit"

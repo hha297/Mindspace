@@ -11,13 +11,14 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { EmergencyBanner } from '@/components/emergency-banner';
-import { Mail, Chrome, Github } from 'lucide-react';
+import { Mail, Chrome, Github, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 
 export default function SignInPage() {
         const [email, setEmail] = useState('');
         const [password, setPassword] = useState('');
+        const [showPassword, setShowPassword] = useState(false);
         const [isLoading, setIsLoading] = useState(false);
         const router = useRouter();
         const { status } = useSession();
@@ -83,9 +84,7 @@ export default function SignInPage() {
                                         description: errorMessage,
                                 });
                         } else {
-                                toast.success('Welcome back!', {
-                                        description: 'You have been signed in successfully.',
-                                });
+                                toast.success('Welcome back!');
                                 router.push('/dashboard');
                         }
                 } catch {
@@ -110,7 +109,7 @@ export default function SignInPage() {
         };
 
         return (
-                <div className="min-h-screen bg-background flex flex-col">
+                <div className="min-h-screen p-8 bg-background flex flex-col">
                         <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
                                 <div className="max-w-md w-full space-y-8">
                                         <div className="text-center">
@@ -182,17 +181,43 @@ export default function SignInPage() {
                                                                 </div>
                                                                 <div className="space-y-2">
                                                                         <Label htmlFor="password">Password</Label>
-                                                                        <Input
-                                                                                id="password"
-                                                                                type="password"
-                                                                                placeholder="Enter your password"
-                                                                                value={password}
-                                                                                onChange={(e) =>
-                                                                                        setPassword(e.target.value)
-                                                                                }
-                                                                                required
-                                                                                className="bg-white border-primary/50"
-                                                                        />
+                                                                        <div className="relative">
+                                                                                <Input
+                                                                                        id="password"
+                                                                                        type={
+                                                                                                showPassword
+                                                                                                        ? 'text'
+                                                                                                        : 'password'
+                                                                                        }
+                                                                                        placeholder="Enter your password"
+                                                                                        value={password}
+                                                                                        onChange={(e) =>
+                                                                                                setPassword(
+                                                                                                        e.target.value,
+                                                                                                )
+                                                                                        }
+                                                                                        required
+                                                                                        className="bg-white border-primary/50 pr-10"
+                                                                                />
+                                                                                <Button
+                                                                                        type="button"
+                                                                                        variant="ghost"
+                                                                                        size="sm"
+                                                                                        className="absolute right-0 top-0 h-full px-3"
+                                                                                        tabIndex={-1}
+                                                                                        onClick={() =>
+                                                                                                setShowPassword(
+                                                                                                        !showPassword,
+                                                                                                )
+                                                                                        }
+                                                                                >
+                                                                                        {showPassword ? (
+                                                                                                <EyeOff className="h-4 w-4 hover:text-primary" />
+                                                                                        ) : (
+                                                                                                <Eye className="h-4 w-4 hover:text-primary" />
+                                                                                        )}
+                                                                                </Button>
+                                                                        </div>
                                                                 </div>
                                                                 <Button
                                                                         type="submit"

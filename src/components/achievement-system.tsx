@@ -220,11 +220,11 @@ export function AchievementSystem({ userStats, onAchievementUnlocked }: Achievem
                 <>
                         <Card>
                                 <CardHeader>
-                                        <CardTitle className="flex items-center space-x-2">
-                                                <Trophy className="h-5 w-5 text-yellow-500" />
+                                        <CardTitle className="flex items-center justify-center sm:justify-start space-x-2">
+                                                <Trophy className="h-6 w-6 sm:h-5 sm:w-5 text-yellow-500" />
                                                 <span>Achievements</span>
                                         </CardTitle>
-                                        <CardDescription>
+                                        <CardDescription className="text-center sm:text-left">
                                                 Track your progress and unlock badges for your mental health journey
                                         </CardDescription>
                                 </CardHeader>
@@ -248,7 +248,7 @@ export function AchievementSystem({ userStats, onAchievementUnlocked }: Achievem
                                         {/* Unlocked Achievements */}
                                         {unlockedAchievements.length > 0 && (
                                                 <div>
-                                                        <h3 className="font-semibold mb-3 text-green-700">
+                                                        <h3 className="font-semibold mb-3 text-green-700 text-center sm:text-left">
                                                                 Unlocked Achievements
                                                         </h3>
                                                         <div className="grid gap-3">
@@ -257,26 +257,30 @@ export function AchievementSystem({ userStats, onAchievementUnlocked }: Achievem
                                                                         return (
                                                                                 <div
                                                                                         key={achievement.id}
-                                                                                        className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-primary/50"
+                                                                                        className="flex items-start space-x-3 p-3 bg-white rounded-lg border border-primary/50"
                                                                                 >
-                                                                                        <div className="bg-primary/10 p-2 rounded-full">
-                                                                                                <IconComponent className="h-5 w-5 text-green-600" />
+                                                                                        <div className="bg-primary/10 p-2 rounded-full flex-shrink-0">
+                                                                                                <IconComponent className="h-6 w-6 sm:h-5 sm:w-5 text-green-600" />
                                                                                         </div>
-                                                                                        <div className="flex-1">
-                                                                                                <div className="font-medium text-foreground">
-                                                                                                        {
-                                                                                                                achievement.title
-                                                                                                        }
-                                                                                                </div>
-                                                                                                <div className="text-sm text-muted-foreground">
-                                                                                                        {
-                                                                                                                achievement.description
-                                                                                                        }
+                                                                                        <div className="flex-1 min-w-0">
+                                                                                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                                                                                        <div>
+                                                                                                                <div className="font-medium text-foreground">
+                                                                                                                        {
+                                                                                                                                achievement.title
+                                                                                                                        }
+                                                                                                                </div>
+                                                                                                                <div className="text-sm text-muted-foreground">
+                                                                                                                        {
+                                                                                                                                achievement.description
+                                                                                                                        }
+                                                                                                                </div>
+                                                                                                        </div>
+                                                                                                        <Badge className="bg-primary/10 text-primary flex-shrink-0 self-start sm:self-center">
+                                                                                                                Unlocked
+                                                                                                        </Badge>
                                                                                                 </div>
                                                                                         </div>
-                                                                                        <Badge className="bg-primary/10 text-primary">
-                                                                                                Unlocked
-                                                                                        </Badge>
                                                                                 </div>
                                                                         );
                                                                 })}
@@ -287,7 +291,7 @@ export function AchievementSystem({ userStats, onAchievementUnlocked }: Achievem
                                         {/* In Progress Achievements */}
                                         {inProgressAchievements.length > 0 && (
                                                 <div>
-                                                        <h3 className="font-semibold mb-3 text-orange-700">
+                                                        <h3 className="font-semibold mb-3 text-orange-700 text-center sm:text-left">
                                                                 In Progress
                                                         </h3>
                                                         <div className="grid gap-3">
@@ -303,10 +307,10 @@ export function AchievementSystem({ userStats, onAchievementUnlocked }: Achievem
                                                                                         className="p-3 bg-white border border-primary/50 rounded-lg"
                                                                                 >
                                                                                         <div className="flex items-center space-x-3 mb-2">
-                                                                                                <div className="bg-primary/10 p-2 rounded-full">
-                                                                                                        <IconComponent className="h-5 w-5 text-muted-foreground" />
+                                                                                                <div className="bg-primary/10 p-2 rounded-full flex-shrink-0">
+                                                                                                        <IconComponent className="h-6 w-6 sm:h-5 sm:w-5 text-muted-foreground" />
                                                                                                 </div>
-                                                                                                <div className="flex-1">
+                                                                                                <div className="flex-1 min-w-0">
                                                                                                         <div className="font-medium">
                                                                                                                 {
                                                                                                                         achievement.title
@@ -352,7 +356,7 @@ export function AchievementSystem({ userStats, onAchievementUnlocked }: Achievem
                                         {/* Locked Achievements */}
                                         {lockedAchievements.length > 0 && (
                                                 <div>
-                                                        <h3 className="font-semibold mb-3 text-muted-foreground">
+                                                        <h3 className="font-semibold mb-3 text-muted-foreground text-center sm:text-left">
                                                                 Locked
                                                         </h3>
                                                         <div className="grid gap-3">
@@ -363,10 +367,10 @@ export function AchievementSystem({ userStats, onAchievementUnlocked }: Achievem
                                                                                         key={achievement.id}
                                                                                         className="flex items-center space-x-3 p-3 bg-white border border-primary/50 rounded-lg opacity-60"
                                                                                 >
-                                                                                        <div className="bg-primary/10 p-2 rounded-full">
-                                                                                                <IconComponent className="h-5 w-5 text-muted-foreground" />
+                                                                                        <div className="bg-primary/10 p-2 rounded-full flex-shrink-0">
+                                                                                                <IconComponent className="h-6 w-6 sm:h-5 sm:w-5 text-muted-foreground" />
                                                                                         </div>
-                                                                                        <div className="flex-1">
+                                                                                        <div className="flex-1 min-w-0">
                                                                                                 <div className="font-medium text-muted-foreground">
                                                                                                         {
                                                                                                                 achievement.title
