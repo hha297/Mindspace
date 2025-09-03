@@ -9,8 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Settings, Save, RefreshCw, Database, Users, Shield, Bell, Globe, Mail, Lock, Palette } from 'lucide-react';
+import { Save, RefreshCw, Database, Shield, Bell, Globe, Mail, Palette } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface SystemSettings {

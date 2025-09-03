@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { connectDB } from '@/lib/db';
 import Resource from '@/lib/models/Resource';
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
         try {
                 const session = await getServerSession();
                 if (!session?.user?.email) {
@@ -15,8 +15,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
                 await connectDB();
 
+                const { id } = await params;
                 const resource = await Resource.findByIdAndUpdate(
-                        params.id,
+                        id,
                         {
                                 title,
                                 description,
@@ -42,7 +43,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
         try {
                 const session = await getServerSession();
                 if (!session?.user?.email) {
@@ -51,7 +52,8 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
                 await connectDB();
 
-                const resource = await Resource.findByIdAndDelete(params.id);
+                const { id } = await params;
+                const resource = await Resource.findByIdAndDelete(id);
 
                 if (!resource) {
                         return NextResponse.json({ error: 'Resource not found' }, { status: 404 });

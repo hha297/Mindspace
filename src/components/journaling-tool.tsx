@@ -116,6 +116,7 @@ export function JournalingTool() {
                         toast.error('Failed to save entry', {
                                 description: 'Please try again.',
                         });
+                        console.error(error);
                 } finally {
                         setIsSaving(false);
                 }

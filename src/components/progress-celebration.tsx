@@ -19,17 +19,10 @@ export function ProgressCelebration({
         weeklyGoal = 7,
 }: ProgressCelebrationProps) {
         const [weeklyProgress, setWeeklyProgress] = useState(0);
-        const [showEncouragement, setShowEncouragement] = useState(false);
 
         useEffect(() => {
-                // Calculate weekly progress (simplified - in real app, you'd track actual weekly logs)
                 const progress = Math.min((streakCount / weeklyGoal) * 100, 100);
                 setWeeklyProgress(progress);
-
-                // Show encouragement for milestones
-                if (progress >= 50 && progress < 100) {
-                        setShowEncouragement(true);
-                }
         }, [streakCount, weeklyGoal]);
 
         const getMoodEmoji = (score: number) => {
