@@ -1,17 +1,18 @@
 'use client';
 
 import type React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { EmergencyBanner } from '@/components/emergency-banner';
-import { Chrome, Github, UserPlus } from 'lucide-react';
+import { Chrome, Github, UserPlus, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 
@@ -20,7 +21,10 @@ export default function SignUpPage() {
         const [email, setEmail] = useState('');
         const [password, setPassword] = useState('');
         const [confirmPassword, setConfirmPassword] = useState('');
+        const [image, setImage] = useState('');
         const [isLoading, setIsLoading] = useState(false);
+        const [isUploading, setIsUploading] = useState(false);
+        const fileInputRef = useRef<HTMLInputElement>(null);
         const router = useRouter();
         const { status } = useSession();
 
@@ -42,6 +46,49 @@ export default function SignUpPage() {
                         </div>
                 );
         }
+
+        const handleAvatarUpload = async (file: File) => {
+                setIsUploading(true);
+                try {
+                        const formData = new FormData();
+                        formData.append('file', file);
+
+                        const response = await fetch('/api/upload', {
+                                method: 'POST',
+                                body: formData,
+                        });
+
+                        if (response.ok) {
+                                const data = await response.json();
+                                setImage(data.url);
+                                toast.success('Avatar uploaded successfully!');
+                        } else {
+                                toast.error('Failed to upload avatar');
+                        }
+                } catch (error) {
+                        console.error('Failed to upload avatar:', error);
+                        toast.error('Failed to upload avatar');
+                } finally {
+                        setIsUploading(false);
+                }
+        };
+
+        const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+                const file = event.target.files?.[0];
+                if (file) {
+                        // Validate file type
+                        if (!file.type.startsWith('image/')) {
+                                toast.error('Please select an image file');
+                                return;
+                        }
+                        // Validate file size (max 5MB)
+                        if (file.size > 5 * 1024 * 1024) {
+                                toast.error('File size must be less than 5MB');
+                                return;
+                        }
+                        handleAvatarUpload(file);
+                }
+        };
 
         const handleEmailSignUp = async (e: React.FormEvent) => {
                 e.preventDefault();
@@ -73,6 +120,7 @@ export default function SignUpPage() {
                                         name,
                                         email,
                                         password,
+                                        image,
                                 }),
                         });
 
@@ -201,6 +249,70 @@ export default function SignUpPage() {
                                                         </div>
 
                                                         <form onSubmit={handleEmailSignUp} className="space-y-4">
+                                                                {/* Avatar Upload */}
+                                                                <div className="space-y-2">
+                                                                        <Label>Profile Picture (Optional)</Label>
+                                                                        <div className="flex items-center space-x-4">
+                                                                                <div className="relative">
+                                                                                        <Avatar className="h-16 w-16">
+                                                                                                <AvatarImage
+                                                                                                        src={image}
+                                                                                                        alt="Profile"
+                                                                                                />
+                                                                                                <AvatarFallback className="text-lg">
+                                                                                                        {name
+                                                                                                                ?.split(
+                                                                                                                        ' ',
+                                                                                                                )
+                                                                                                                .map(
+                                                                                                                        (
+                                                                                                                                n,
+                                                                                                                        ) =>
+                                                                                                                                n[0],
+                                                                                                                )
+                                                                                                                .join(
+                                                                                                                        '',
+                                                                                                                )
+                                                                                                                .toUpperCase()}
+                                                                                                </AvatarFallback>
+                                                                                        </Avatar>
+                                                                                        {isUploading && (
+                                                                                                <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                                                                                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                                                                                                </div>
+                                                                                        )}
+                                                                                </div>
+                                                                                <div className="space-y-2">
+                                                                                        <Button
+                                                                                                type="button"
+                                                                                                onClick={() =>
+                                                                                                        fileInputRef.current?.click()
+                                                                                                }
+                                                                                                disabled={isUploading}
+                                                                                                variant="outline"
+                                                                                                size="sm"
+                                                                                                className="bg-white border-primary/50"
+                                                                                        >
+                                                                                                <Upload className="h-4 w-4 mr-2" />
+                                                                                                {isUploading
+                                                                                                        ? 'Uploading...'
+                                                                                                        : 'Upload Image'}
+                                                                                        </Button>
+                                                                                        <input
+                                                                                                ref={fileInputRef}
+                                                                                                type="file"
+                                                                                                accept="image/*"
+                                                                                                onChange={
+                                                                                                        handleFileChange
+                                                                                                }
+                                                                                                className="hidden"
+                                                                                        />
+                                                                                        <p className="text-xs text-muted-foreground">
+                                                                                                JPG, PNG, GIF up to 5MB
+                                                                                        </p>
+                                                                                </div>
+                                                                        </div>
+                                                                </div>
                                                                 <div className="space-y-2">
                                                                         <Label htmlFor="name">Full Name</Label>
                                                                         <Input

@@ -60,6 +60,7 @@ const handler = NextAuth({
                                                 id: user._id.toString(),
                                                 email: user.email,
                                                 name: user.name,
+                                                image: user.image,
                                                 role: user.role,
                                         };
                                 } catch (error) {
@@ -80,6 +81,7 @@ const handler = NextAuth({
                                                 await User.create({
                                                         email: user.email,
                                                         name: user.name,
+                                                        image: user.image,
                                                         provider: account.provider,
                                                         providerId: account.providerAccountId,
                                                         role: 'user',
@@ -108,6 +110,7 @@ const handler = NextAuth({
                                                 token.role = dbUser.role;
                                                 token.name = dbUser.name;
                                                 token.email = dbUser.email;
+                                                token.image = dbUser.image;
                                         }
                                 } catch (error) {
                                         console.error('Error fetching user data in JWT:', error);
@@ -118,6 +121,7 @@ const handler = NextAuth({
                         if (trigger === 'update' && session) {
                                 token.name = session.user.name;
                                 token.email = session.user.email;
+                                token.image = session.user.image;
                         }
 
                         return token;
@@ -128,6 +132,7 @@ const handler = NextAuth({
                                 session.user.role = token.role as string;
                                 session.user.name = token.name as string;
                                 session.user.email = token.email as string;
+                                session.user.image = token.image as string;
                         }
                         return session;
                 },

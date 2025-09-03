@@ -5,7 +5,7 @@ import User from '@/lib/models/User';
 
 export async function POST(request: NextRequest) {
         try {
-                const { name, email, password } = await request.json();
+                const { name, email, password, image } = await request.json();
 
                 if (!name || !email || !password) {
                         return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
                         name,
                         email,
                         password: hashedPassword,
+                        image,
                         role: 'user',
                 });
 
@@ -44,6 +45,7 @@ export async function POST(request: NextRequest) {
                                         id: user._id,
                                         name: user.name,
                                         email: user.email,
+                                        image: user.image,
                                         role: user.role,
                                 },
                         },
