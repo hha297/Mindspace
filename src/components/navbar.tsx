@@ -5,13 +5,27 @@ import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
         DropdownMenu,
         DropdownMenuContent,
         DropdownMenuItem,
         DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Home, BarChart3, BookOpen, Wrench, Menu, X, LogOut, User, Settings, ChevronDown } from 'lucide-react';
+import {
+        Home,
+        BarChart3,
+        BookOpen,
+        Wrench,
+        Menu,
+        X,
+        LogOut,
+        User,
+        Settings,
+        ChevronDown,
+        LayoutDashboardIcon,
+        Users,
+} from 'lucide-react';
 import Image from 'next/image';
 
 export function Navbar() {
@@ -123,17 +137,17 @@ export function Navbar() {
                                                                                         href="/admin"
                                                                                         className="flex items-center space-x-2 cursor-pointer"
                                                                                 >
-                                                                                        <BarChart3 className="h-4 w-4 hover:text-white" />
-                                                                                        <span>Dashboard</span>
+                                                                                        <LayoutDashboardIcon className="h-4 w-4 hover:text-white" />
+                                                                                        <span>Overview</span>
                                                                                 </Link>
                                                                         </DropdownMenuItem>
                                                                         <DropdownMenuItem asChild>
                                                                                 <Link
-                                                                                        href="/admin/analytics"
+                                                                                        href="/admin/users"
                                                                                         className="flex items-center space-x-2 cursor-pointer"
                                                                                 >
-                                                                                        <BarChart3 className="h-4 w-4 hover:text-white" />
-                                                                                        <span>Analytics</span>
+                                                                                        <Users className="h-4 w-4 hover:text-white" />
+                                                                                        <span>Users</span>
                                                                                 </Link>
                                                                         </DropdownMenuItem>
                                                                         <DropdownMenuItem asChild>
@@ -143,6 +157,15 @@ export function Navbar() {
                                                                                 >
                                                                                         <BookOpen className="h-4 w-4 hover:text-white" />
                                                                                         <span>Resources</span>
+                                                                                </Link>
+                                                                        </DropdownMenuItem>
+                                                                        <DropdownMenuItem asChild>
+                                                                                <Link
+                                                                                        href="/admin/analytics"
+                                                                                        className="flex items-center space-x-2 cursor-pointer"
+                                                                                >
+                                                                                        <BarChart3 className="h-4 w-4 hover:text-white" />
+                                                                                        <span>Analytics</span>
                                                                                 </Link>
                                                                         </DropdownMenuItem>
                                                                         <DropdownMenuItem asChild>
@@ -168,17 +191,19 @@ export function Navbar() {
                                                                         className="hover:bg-primary hover:text-white rounded-md py-1 px-2 "
                                                                 >
                                                                         <div className="flex items-center space-x-2 text-sm">
-                                                                                {session.user?.image ? (
-                                                                                        <Image
-                                                                                                src={session.user.image}
+                                                                                <Avatar className="h-6 w-6">
+                                                                                        <AvatarImage
+                                                                                                src={
+                                                                                                        session.user
+                                                                                                                ?.image ||
+                                                                                                        undefined
+                                                                                                }
                                                                                                 alt="Profile"
-                                                                                                className="h-6 w-6 rounded-full"
-                                                                                                width={24}
-                                                                                                height={24}
                                                                                         />
-                                                                                ) : (
-                                                                                        <User className="h-4 w-4" />
-                                                                                )}
+                                                                                        <AvatarFallback>
+                                                                                                <User className="h-4 w-4" />
+                                                                                        </AvatarFallback>
+                                                                                </Avatar>
                                                                                 <p>
                                                                                         {userName ||
                                                                                                 session.user?.name ||
@@ -294,21 +319,20 @@ export function Navbar() {
                                                                 {session ? (
                                                                         <div className="space-y-2">
                                                                                 <div className="px-1 py-2 text-sm text-muted-foreground flex items-center space-x-2">
-                                                                                        {session.user?.image ? (
-                                                                                                <Image
+                                                                                        <Avatar className="size-8">
+                                                                                                <AvatarImage
                                                                                                         src={
                                                                                                                 session
                                                                                                                         .user
-                                                                                                                        .image
+                                                                                                                        ?.image ||
+                                                                                                                undefined
                                                                                                         }
                                                                                                         alt="Profile"
-                                                                                                        className="size-8 rounded-full"
-                                                                                                        width={32}
-                                                                                                        height={32}
                                                                                                 />
-                                                                                        ) : (
-                                                                                                <User className="size-5" />
-                                                                                        )}
+                                                                                                <AvatarFallback>
+                                                                                                        <User className="size-5" />
+                                                                                                </AvatarFallback>
+                                                                                        </Avatar>
                                                                                         <span>
                                                                                                 Signed in as{' '}
                                                                                                 {userName ||

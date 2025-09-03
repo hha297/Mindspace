@@ -7,6 +7,10 @@ export interface IUser extends Document {
         provider: 'email' | 'google' | 'github';
         image?: string;
         role: 'user' | 'admin';
+        emergencyContact?: string;
+        personalGoals?: string;
+        notificationsEnabled: boolean;
+        privacyLevel: 'public' | 'private';
         streakCount: number;
         badges: string[];
         lastMoodLog?: Date;
@@ -44,6 +48,21 @@ const UserSchema = new Schema<IUser>(
                 },
                 image: {
                         type: String,
+                },
+                emergencyContact: {
+                        type: String,
+                },
+                personalGoals: {
+                        type: String,
+                },
+                notificationsEnabled: {
+                        type: Boolean,
+                        default: true,
+                },
+                privacyLevel: {
+                        type: String,
+                        enum: ['public', 'private'],
+                        default: 'private',
                 },
                 streakCount: {
                         type: Number,

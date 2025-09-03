@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Navbar } from '@/components/navbar';
 import { EmergencyBanner } from '@/components/emergency-banner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,14 +11,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-import { User, Phone, Target, Shield, Lock } from 'lucide-react';
+import { User, Phone, Target, Shield, Camera, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface UserProfile {
         name: string;
         email: string;
         provider: 'email' | 'google' | 'github';
+        image?: string;
         emergencyContact?: string;
         personalGoals?: string;
         notificationsEnabled: boolean;
@@ -29,8 +31,11 @@ export default function ProfilePage() {
         const { data: session, status, update } = useSession();
         const router = useRouter();
         const [profile, setProfile] = useState<UserProfile | null>(null);
+        const [originalProfile, setOriginalProfile] = useState<UserProfile | null>(null);
         const [isLoading, setIsLoading] = useState(true);
         const [isSaving, setIsSaving] = useState(false);
+        const [isUploading, setIsUploading] = useState(false);
+        const fileInputRef = useRef<HTMLInputElement>(null);
 
         useEffect(() => {
                 if (status === 'unauthenticated') {
@@ -46,15 +51,18 @@ export default function ProfilePage() {
                         if (response.ok) {
                                 const data = await response.json();
                                 console.log(data);
-                                setProfile({
+                                const profileData = {
                                         name: data.user.name || '',
                                         email: data.user.email || '',
                                         provider: data.user.provider || 'email',
+                                        image: data.user.image || '',
                                         emergencyContact: data.user.emergencyContact || '',
                                         personalGoals: data.user.personalGoals || '',
                                         notificationsEnabled: data.user.notificationsEnabled ?? true,
                                         privacyLevel: data.user.privacyLevel || 'private',
-                                });
+                                };
+                                setProfile(profileData);
+                                setOriginalProfile(profileData);
                         }
                 } catch (error) {
                         console.error('Failed to fetch profile:', error);
@@ -77,6 +85,8 @@ export default function ProfilePage() {
 
                         if (response.ok) {
                                 toast.success('Profile updated successfully!');
+                                // Update original profile to reflect saved state
+                                setOriginalProfile(profile);
                                 // Store updated name in localStorage for immediate navbar update
                                 localStorage.setItem('userName', profile.name);
                                 // Emit event to notify navbar
@@ -85,6 +95,7 @@ export default function ProfilePage() {
                                 await update({
                                         name: profile.name,
                                         email: profile.email,
+                                        image: profile.image,
                                 });
                         } else {
                                 toast.error('Failed to update profile');
@@ -97,7 +108,65 @@ export default function ProfilePage() {
                 }
         };
 
+        const handleAvatarUpload = async (file: File) => {
+                setIsUploading(true);
+                try {
+                        const formData = new FormData();
+                        formData.append('file', file);
+
+                        const response = await fetch('/api/upload', {
+                                method: 'POST',
+                                body: formData,
+                        });
+
+                        if (response.ok) {
+                                const data = await response.json();
+                                setProfile({
+                                        ...profile!,
+                                        image: data.url,
+                                });
+                                toast.success('Avatar updated successfully!');
+                        } else {
+                                toast.error('Failed to upload avatar');
+                        }
+                } catch (error) {
+                        console.error('Failed to upload avatar:', error);
+                        toast.error('Failed to upload avatar');
+                } finally {
+                        setIsUploading(false);
+                }
+        };
+
+        const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+                const file = event.target.files?.[0];
+                if (file) {
+                        // Validate file type
+                        if (!file.type.startsWith('image/')) {
+                                toast.error('Please select an image file');
+                                return;
+                        }
+                        // Validate file size (max 5MB)
+                        if (file.size > 5 * 1024 * 1024) {
+                                toast.error('File size must be less than 5MB');
+                                return;
+                        }
+                        handleAvatarUpload(file);
+                }
+        };
+
         const isOAuthUser = profile?.provider === 'google' || profile?.provider === 'github';
+
+        // Check if there are any changes compared to original profile (excluding email)
+        const hasChanges =
+                originalProfile &&
+                profile &&
+                // Only check name changes for non-OAuth users
+                ((!isOAuthUser && profile.name !== originalProfile.name) ||
+                        profile.image !== originalProfile.image ||
+                        profile.emergencyContact !== originalProfile.emergencyContact ||
+                        profile.personalGoals !== originalProfile.personalGoals ||
+                        profile.notificationsEnabled !== originalProfile.notificationsEnabled ||
+                        profile.privacyLevel !== originalProfile.privacyLevel);
 
         if (status === 'loading' || isLoading) {
                 return (
@@ -133,6 +202,68 @@ export default function ProfilePage() {
                                 </div>
 
                                 <div className="space-y-6">
+                                        {/* Avatar Section */}
+                                        <Card>
+                                                <CardHeader>
+                                                        <CardTitle className="flex items-center space-x-2">
+                                                                <Camera className="h-5 w-5" />
+                                                                <span>Profile Picture</span>
+                                                        </CardTitle>
+                                                        <CardDescription>
+                                                                Upload a profile picture to personalize your account
+                                                        </CardDescription>
+                                                </CardHeader>
+                                                <CardContent>
+                                                        <div className="flex items-center space-x-4">
+                                                                <div className="relative">
+                                                                        <Avatar className="h-20 w-20">
+                                                                                <AvatarImage
+                                                                                        src={profile?.image}
+                                                                                        alt={profile?.name}
+                                                                                />
+                                                                                <AvatarFallback className="text-lg">
+                                                                                        {profile?.name
+                                                                                                ?.split(' ')
+                                                                                                .map((n) => n[0])
+                                                                                                .join('')
+                                                                                                .toUpperCase()}
+                                                                                </AvatarFallback>
+                                                                        </Avatar>
+                                                                        {isUploading && (
+                                                                                <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                                                                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                                                                                </div>
+                                                                        )}
+                                                                </div>
+                                                                <div className="space-y-2">
+                                                                        <Button
+                                                                                onClick={() =>
+                                                                                        fileInputRef.current?.click()
+                                                                                }
+                                                                                disabled={isUploading}
+                                                                                variant="outline"
+                                                                                className="bg-white border-primary/50"
+                                                                        >
+                                                                                <Upload className="h-4 w-4 mr-2" />
+                                                                                {isUploading
+                                                                                        ? 'Uploading...'
+                                                                                        : 'Upload Image'}
+                                                                        </Button>
+                                                                        <input
+                                                                                ref={fileInputRef}
+                                                                                type="file"
+                                                                                accept="image/*"
+                                                                                onChange={handleFileChange}
+                                                                                className="hidden"
+                                                                        />
+                                                                        <p className="text-sm text-muted-foreground">
+                                                                                JPG, PNG, GIF up to 5MB
+                                                                        </p>
+                                                                </div>
+                                                        </div>
+                                                </CardContent>
+                                        </Card>
+
                                         {/* Personal Information */}
                                         <Card>
                                                 <CardHeader>
@@ -142,17 +273,6 @@ export default function ProfilePage() {
                                                         </CardTitle>
                                                         <CardDescription>
                                                                 Update your basic profile information
-                                                                {isOAuthUser && (
-                                                                        <span className="block mt-1 text-amber-600 dark:text-amber-400">
-                                                                                <Lock className="inline h-3 w-3 mr-2 mb-1" />
-                                                                                Name and email are managed by your{' '}
-                                                                                {profile?.provider === 'google'
-                                                                                        ? 'Google'
-                                                                                        : 'GitHub'}{' '}
-                                                                                account. So you can&apos;t change it
-                                                                                here.
-                                                                        </span>
-                                                                )}
                                                         </CardDescription>
                                                 </CardHeader>
                                                 <CardContent className="space-y-4">
@@ -176,6 +296,15 @@ export default function ProfilePage() {
                                                                                                 'cursor-not-allowed opacity-60',
                                                                                 )}
                                                                         />
+                                                                        {isOAuthUser && (
+                                                                                <p className="text-xs text-muted-foreground">
+                                                                                        Name is managed by your{' '}
+                                                                                        {profile?.provider === 'google'
+                                                                                                ? 'Google'
+                                                                                                : 'GitHub'}{' '}
+                                                                                        account
+                                                                                </p>
+                                                                        )}
                                                                 </div>
                                                                 <div className="space-y-2">
                                                                         <Label htmlFor="email">Email Address</Label>
@@ -190,13 +319,12 @@ export default function ProfilePage() {
                                                                                         })
                                                                                 }
                                                                                 placeholder="Enter your email"
-                                                                                disabled={isOAuthUser}
-                                                                                className={cn(
-                                                                                        'bg-white border-primary/50',
-                                                                                        isOAuthUser &&
-                                                                                                'cursor-not-allowed opacity-60',
-                                                                                )}
+                                                                                disabled={true}
+                                                                                className="bg-white border-primary/50 cursor-not-allowed opacity-60"
                                                                         />
+                                                                        <p className="text-xs text-muted-foreground">
+                                                                                Email address cannot be changed
+                                                                        </p>
                                                                 </div>
                                                         </div>
                                                 </CardContent>
@@ -330,7 +458,12 @@ export default function ProfilePage() {
 
                                         {/* Save Button */}
                                         <div className="flex justify-end">
-                                                <Button onClick={handleSave} disabled={isSaving} size="lg">
+                                                <Button
+                                                        onClick={handleSave}
+                                                        disabled={isSaving || isLoading || !hasChanges}
+                                                        size="lg"
+                                                        className={cn(!hasChanges && 'opacity-50 cursor-not-allowed')}
+                                                >
                                                         {isSaving ? 'Saving...' : 'Save Changes'}
                                                 </Button>
                                         </div>

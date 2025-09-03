@@ -41,6 +41,7 @@ export async function GET() {
                                 name: user.name,
                                 email: user.email,
                                 provider: user.provider, // Include provider field for frontend OAuth checks
+                                image: user.image,
                                 emergencyContact: user.emergencyContact,
                                 personalGoals: user.personalGoals,
                                 notificationsEnabled: user.notificationsEnabled ?? true,
@@ -69,7 +70,7 @@ export async function PUT(request: NextRequest) {
                         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
                 }
 
-                const { name, email, emergencyContact, personalGoals, notificationsEnabled, privacyLevel } =
+                const { name, email, image, emergencyContact, personalGoals, notificationsEnabled, privacyLevel } =
                         await request.json();
 
                 await connectDB();
@@ -79,28 +80,34 @@ export async function PUT(request: NextRequest) {
                         return NextResponse.json({ error: 'User not found' }, { status: 404 });
                 }
 
+                if (!name) {
+                        return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+                }
+
                 const isOAuthUser = user.provider === 'google' || user.provider === 'github';
 
-                if (isOAuthUser && (name !== user.name || email !== user.email)) {
+                // Don't allow email changes for any provider
+                if (email && email !== user.email) {
+                        return NextResponse.json({ error: 'Email address cannot be changed' }, { status: 400 });
+                }
+
+                // Don't allow name changes for OAuth users
+                if (isOAuthUser && name !== user.name) {
                         return NextResponse.json(
                                 {
-                                        error: 'Name and email cannot be changed for OAuth accounts',
+                                        error: `Name cannot be changed for ${user.provider} accounts`,
                                 },
                                 { status: 400 },
                         );
                 }
 
-                if (!name) {
-                        return NextResponse.json({ error: 'Name is required' }, { status: 400 });
-                }
-
                 const updateData: any = {};
                 if (!isOAuthUser) {
                         updateData.name = name;
-                        if (email) updateData.email = email;
                 }
 
                 // These fields can always be updated regardless of provider
+                if (image !== undefined) updateData.image = image;
                 if (emergencyContact !== undefined) updateData.emergencyContact = emergencyContact;
                 if (personalGoals !== undefined) updateData.personalGoals = personalGoals;
                 if (notificationsEnabled !== undefined) updateData.notificationsEnabled = notificationsEnabled;
@@ -120,6 +127,7 @@ export async function PUT(request: NextRequest) {
                                 name: updatedUser.name,
                                 email: updatedUser.email,
                                 provider: updatedUser.provider, // Include provider in response
+                                image: updatedUser.image,
                                 emergencyContact: updatedUser.emergencyContact,
                                 personalGoals: updatedUser.personalGoals,
                                 notificationsEnabled: updatedUser.notificationsEnabled,
