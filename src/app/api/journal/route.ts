@@ -14,7 +14,7 @@ interface JournalEntry {
         updatedAt: Date;
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
         try {
                 const session = await getServerSession();
                 if (!session?.user?.email) {
@@ -27,9 +27,6 @@ export async function GET(request: NextRequest) {
                 if (!user) {
                         return NextResponse.json({ error: 'User not found' }, { status: 404 });
                 }
-
-                const { searchParams } = new URL(request.url);
-                const limit = Number.parseInt(searchParams.get('limit') || '20');
 
                 // For now, return empty array since we don't have a Journal model yet
                 // This can be expanded when a proper Journal model is created

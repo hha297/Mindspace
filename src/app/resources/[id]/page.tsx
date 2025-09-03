@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { EmergencyBanner } from '@/components/emergency-banner';
@@ -32,13 +32,7 @@ export default function ResourceDetailPage() {
         const [resource, setResource] = useState<Resource | null>(null);
         const [isLoading, setIsLoading] = useState(true);
 
-        useEffect(() => {
-                if (resourceId) {
-                        fetchResource();
-                }
-        }, [resourceId]);
-
-        const fetchResource = async () => {
+        const fetchResource = useCallback(async () => {
                 try {
                         setIsLoading(true);
                         const response = await fetch(`/api/resources/${resourceId}`);
@@ -55,7 +49,13 @@ export default function ResourceDetailPage() {
                 } finally {
                         setIsLoading(false);
                 }
-        };
+        }, [resourceId]);
+
+        useEffect(() => {
+                if (resourceId) {
+                        fetchResource();
+                }
+        }, [fetchResource, resourceId]);
 
         const getTypeIcon = (type: string) => {
                 switch (type) {
@@ -117,8 +117,8 @@ export default function ResourceDetailPage() {
                                                         Resource Not Found
                                                 </h1>
                                                 <p className="text-muted-foreground mb-6">
-                                                        The resource you're looking for doesn't exist or has been
-                                                        removed.
+                                                        The resource you&apos;re looking for doesn&apos;t exist or has
+                                                        been removed.
                                                 </p>
                                                 <Button onClick={() => window.history.back()}>
                                                         <ArrowLeft className="h-4 w-4 mr-2" />

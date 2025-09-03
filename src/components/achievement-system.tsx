@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -110,10 +110,6 @@ export function AchievementSystem({ userStats, onAchievementUnlocked }: Achievem
         const [newAchievement, setNewAchievement] = useState<Achievement | null>(null);
         const [showCelebration, setShowCelebration] = useState(false);
 
-        useEffect(() => {
-                updateAchievements();
-        }, [userStats]);
-
         // Get viewed achievements from localStorage
         const getViewedAchievements = (): string[] => {
                 if (typeof window === 'undefined') return [];
@@ -122,14 +118,14 @@ export function AchievementSystem({ userStats, onAchievementUnlocked }: Achievem
         };
 
         // Save viewed achievement to localStorage
-        const markAchievementAsViewed = (achievementId: string) => {
+        const markAchievementAsViewed = useCallback((achievementId: string) => {
                 if (typeof window === 'undefined') return;
                 const viewed = getViewedAchievements();
                 if (!viewed.includes(achievementId)) {
                         viewed.push(achievementId);
                         localStorage.setItem('viewedAchievements', JSON.stringify(viewed));
                 }
-        };
+        }, []);
 
         // Save achievement to database
         const saveAchievementToDatabase = async (achievementId: string) => {
@@ -148,7 +144,7 @@ export function AchievementSystem({ userStats, onAchievementUnlocked }: Achievem
                 }
         };
 
-        const updateAchievements = () => {
+        const updateAchievements = useCallback(() => {
                 const updatedAchievements = achievementDefinitions.map((def) => {
                         let currentProgress = 0;
                         let isUnlocked = false;
@@ -204,7 +200,17 @@ export function AchievementSystem({ userStats, onAchievementUnlocked }: Achievem
                 });
 
                 setAchievements(updatedAchievements);
-        };
+        }, [
+                userStats.badges,
+                userStats.totalMoodLogs,
+                userStats.streakCount,
+                onAchievementUnlocked,
+                markAchievementAsViewed,
+        ]);
+
+        useEffect(() => {
+                updateAchievements();
+        }, [updateAchievements, userStats]);
 
         const unlockedAchievements = achievements.filter((a) => a.isUnlocked);
         const inProgressAchievements = achievements.filter((a) => !a.isUnlocked && a.currentProgress > 0);

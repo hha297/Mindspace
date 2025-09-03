@@ -129,6 +129,7 @@ export function MoodTracker({ onMoodLogged }: MoodTrackerProps) {
                         toast.error('Failed to log mood', {
                                 description: 'Please try again later.',
                         });
+                        console.error(error);
                 } finally {
                         setIsLoading(false);
                 }

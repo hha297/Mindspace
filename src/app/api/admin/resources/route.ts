@@ -2,7 +2,6 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { connectDB } from '@/lib/db';
 import Resource from '@/lib/models/Resource';
-import User from '@/lib/models/User';
 
 export async function GET(request: NextRequest) {
         try {

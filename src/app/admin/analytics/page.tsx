@@ -6,21 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-        Users,
-        BookOpen,
-        TrendingUp,
-        Activity,
-        Calendar,
-        BarChart3,
-        PieChart,
-        Target,
-        Clock,
-        Star,
-        Eye,
-        Heart,
-        Smile,
-} from 'lucide-react';
+import { Users, BookOpen, Activity, Calendar, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AnalyticsData {

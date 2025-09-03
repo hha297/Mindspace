@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { EmergencyBanner } from '@/components/emergency-banner';
-import { Heart, Chrome, Github, UserPlus } from 'lucide-react';
+import { Chrome, Github, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 

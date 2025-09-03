@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -306,8 +307,8 @@ export default function ResourcesPage() {
                                                         Need Help Finding Resources?
                                                 </h2>
                                                 <p className="text-muted-foreground">
-                                                        Our resource library is constantly growing. Can't find what
-                                                        you're looking for?
+                                                        Our resource library is constantly growing. Can&apos;t find what
+                                                        you&apos;re looking for?
                                                 </p>
                                         </div>
                                         <div className="flex flex-col sm:flex-row gap-4 justify-center">

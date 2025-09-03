@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
                 await connectDB();
 
-                let query: any = {};
+                const query: any = {};
 
                 if (category) {
                         query.category = category;

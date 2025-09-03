@@ -2,7 +2,7 @@
 
 import type React from 'react';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -37,11 +37,7 @@ export default function AdminUsersPage() {
         const [searchTerm, setSearchTerm] = useState('');
         const [currentPage, setCurrentPage] = useState(1);
 
-        useEffect(() => {
-                fetchUsers();
-        }, [currentPage, searchTerm]);
-
-        const fetchUsers = async () => {
+        const fetchUsers = useCallback(async () => {
                 setIsLoading(true);
                 try {
                         const params = new URLSearchParams({
@@ -60,7 +56,11 @@ export default function AdminUsersPage() {
                 } finally {
                         setIsLoading(false);
                 }
-        };
+        }, [currentPage, searchTerm]);
+
+        useEffect(() => {
+                fetchUsers();
+        }, [fetchUsers]);
 
         const handleSearch = (e: React.FormEvent) => {
                 e.preventDefault();
