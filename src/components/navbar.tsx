@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +12,10 @@ import {
         DropdownMenuContent,
         DropdownMenuItem,
         DropdownMenuTrigger,
+        DropdownMenuSeparator,
+        DropdownMenuSub,
+        DropdownMenuSubContent,
+        DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
         Home,
@@ -27,11 +32,13 @@ import {
         Users,
 } from 'lucide-react';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 export function Navbar() {
         const { data: session, update } = useSession();
         const [isMenuOpen, setIsMenuOpen] = useState(false);
         const [userName, setUserName] = useState<string | null>(null);
+        const pathname = usePathname();
 
         // Listen for profile update events and session changes
         useEffect(() => {
@@ -80,6 +87,14 @@ export function Navbar() {
                 { name: 'Resources', href: '/resources', icon: BookOpen },
         ];
 
+        // Check if current path is active
+        const isActive = (href: string) => {
+                if (href === '/') {
+                        return pathname === '/';
+                }
+                return pathname.startsWith(href);
+        };
+
         return (
                 <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border sticky top-0 z-50">
                         <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -106,123 +121,173 @@ export function Navbar() {
                                         <div className="hidden md:flex items-center space-x-2">
                                                 {navigation.map((item) => {
                                                         const Icon = item.icon;
+                                                        const active = isActive(item.href);
                                                         return (
                                                                 <Link
                                                                         key={item.name}
                                                                         href={item.href}
-                                                                        className="flex items-center space-x-1 px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:bg-primary hover:text-white transition-colors"
+                                                                        className={cn(
+                                                                                'flex items-center space-x-1 px-4 py-2 rounded-md text-sm font-medium transition-colors',
+                                                                                active
+                                                                                        ? 'bg-primary text-white'
+                                                                                        : 'text-muted-foreground hover:bg-primary hover:text-white',
+                                                                        )}
                                                                 >
                                                                         <Icon className="h-4 w-4" />
                                                                         <span>{item.name}</span>
                                                                 </Link>
                                                         );
                                                 })}
-
-                                                {/* Admin Dropdown */}
-                                                {session?.user.role === 'admin' && (
-                                                        <DropdownMenu>
-                                                                <DropdownMenuTrigger asChild>
-                                                                        <Button
-                                                                                variant="ghost"
-                                                                                className="flex items-center space-x-1 text-sm font-medium hover:bg-primary text-muted-foreground hover:text-white transition-colors"
-                                                                        >
-                                                                                <Settings className="h-4 w-4" />
-                                                                                <span>Admin</span>
-                                                                                <ChevronDown className="h-4 w-4" />
-                                                                        </Button>
-                                                                </DropdownMenuTrigger>
-                                                                <DropdownMenuContent align="end">
-                                                                        <DropdownMenuItem asChild>
-                                                                                <Link
-                                                                                        href="/admin"
-                                                                                        className="flex items-center space-x-2 cursor-pointer"
-                                                                                >
-                                                                                        <LayoutDashboardIcon className="h-4 w-4 hover:text-white" />
-                                                                                        <span>Overview</span>
-                                                                                </Link>
-                                                                        </DropdownMenuItem>
-                                                                        <DropdownMenuItem asChild>
-                                                                                <Link
-                                                                                        href="/admin/users"
-                                                                                        className="flex items-center space-x-2 cursor-pointer"
-                                                                                >
-                                                                                        <Users className="h-4 w-4 hover:text-white" />
-                                                                                        <span>Users</span>
-                                                                                </Link>
-                                                                        </DropdownMenuItem>
-                                                                        <DropdownMenuItem asChild>
-                                                                                <Link
-                                                                                        href="/admin/resources"
-                                                                                        className="flex items-center space-x-2 cursor-pointer"
-                                                                                >
-                                                                                        <BookOpen className="h-4 w-4 hover:text-white" />
-                                                                                        <span>Resources</span>
-                                                                                </Link>
-                                                                        </DropdownMenuItem>
-                                                                        <DropdownMenuItem asChild>
-                                                                                <Link
-                                                                                        href="/admin/analytics"
-                                                                                        className="flex items-center space-x-2 cursor-pointer"
-                                                                                >
-                                                                                        <BarChart3 className="h-4 w-4 hover:text-white" />
-                                                                                        <span>Analytics</span>
-                                                                                </Link>
-                                                                        </DropdownMenuItem>
-                                                                        <DropdownMenuItem asChild>
-                                                                                <Link
-                                                                                        href="/admin/settings"
-                                                                                        className="flex items-center space-x-2 cursor-pointer"
-                                                                                >
-                                                                                        <Settings className="h-4 w-4 hover:text-white" />
-                                                                                        <span>Settings</span>
-                                                                                </Link>
-                                                                        </DropdownMenuItem>
-                                                                </DropdownMenuContent>
-                                                        </DropdownMenu>
-                                                )}
                                         </div>
 
                                         {/* Desktop Auth Buttons */}
                                         <div className="hidden md:flex items-center space-x-4">
                                                 {session ? (
                                                         <div className="flex items-center space-x-3">
-                                                                <Link
-                                                                        href="/profile"
-                                                                        className="hover:bg-primary hover:text-white rounded-md py-1 px-2 "
-                                                                >
-                                                                        <div className="flex items-center space-x-2 text-sm">
-                                                                                <Avatar className="h-6 w-6">
-                                                                                        <AvatarImage
-                                                                                                src={
+                                                                <DropdownMenu>
+                                                                        <DropdownMenuTrigger asChild>
+                                                                                <Button
+                                                                                        variant="ghost"
+                                                                                        className="flex items-center space-x-2 hover:bg-primary hover:text-white rounded-md py-1 px-2 transition-colors"
+                                                                                >
+                                                                                        <Avatar className="h-6 w-6">
+                                                                                                <AvatarImage
+                                                                                                        src={
+                                                                                                                session
+                                                                                                                        .user
+                                                                                                                        ?.image ||
+                                                                                                                undefined
+                                                                                                        }
+                                                                                                        alt="Profile"
+                                                                                                />
+                                                                                                <AvatarFallback>
+                                                                                                        <User className="h-4 w-4" />
+                                                                                                </AvatarFallback>
+                                                                                        </Avatar>
+                                                                                        <p className="text-sm">
+                                                                                                {userName ||
                                                                                                         session.user
-                                                                                                                ?.image ||
-                                                                                                        undefined
-                                                                                                }
-                                                                                                alt="Profile"
-                                                                                        />
-                                                                                        <AvatarFallback>
-                                                                                                <User className="h-4 w-4" />
-                                                                                        </AvatarFallback>
-                                                                                </Avatar>
-                                                                                <p>
-                                                                                        {userName ||
-                                                                                                session.user?.name ||
-                                                                                                session.user?.email}
-                                                                                </p>
-                                                                        </div>
-                                                                </Link>
+                                                                                                                ?.name ||
+                                                                                                        session.user
+                                                                                                                ?.email}
+                                                                                        </p>
+                                                                                        <ChevronDown className="h-4 w-4" />
+                                                                                </Button>
+                                                                        </DropdownMenuTrigger>
+                                                                        <DropdownMenuContent
+                                                                                align="end"
+                                                                                className="w-56"
+                                                                        >
+                                                                                <DropdownMenuItem asChild>
+                                                                                        <Link
+                                                                                                href="/profile"
+                                                                                                className="flex items-center space-x-2 cursor-pointer"
+                                                                                        >
+                                                                                                <User className="h-4 w-4 hover:text-white" />
+                                                                                                <span>Profile</span>
+                                                                                        </Link>
+                                                                                </DropdownMenuItem>
 
-                                                                <Button
-                                                                        onClick={() => {
-                                                                                localStorage.removeItem('userName');
-                                                                                signOut({ callbackUrl: '/' });
-                                                                        }}
-                                                                        variant="outline"
-                                                                        size="sm"
-                                                                >
-                                                                        <LogOut className="h-4 w-4 mr-2" />
-                                                                        Sign Out
-                                                                </Button>
+                                                                                {session?.user.role === 'admin' && (
+                                                                                        <>
+                                                                                                <DropdownMenuSeparator />
+                                                                                                <DropdownMenuSub>
+                                                                                                        <DropdownMenuSubTrigger className="flex items-center space-x-2 cursor-pointer">
+                                                                                                                <LayoutDashboardIcon className="h-4 w-4" />
+                                                                                                                <span>
+                                                                                                                        Admin
+                                                                                                                        Dashboard
+                                                                                                                </span>
+                                                                                                        </DropdownMenuSubTrigger>
+                                                                                                        <DropdownMenuSubContent>
+                                                                                                                <DropdownMenuItem
+                                                                                                                        asChild
+                                                                                                                >
+                                                                                                                        <Link
+                                                                                                                                href="/admin"
+                                                                                                                                className="flex items-center space-x-2 cursor-pointer"
+                                                                                                                        >
+                                                                                                                                <LayoutDashboardIcon className="h-4 w-4 hover:text-white" />
+                                                                                                                                <span>
+                                                                                                                                        Overview
+                                                                                                                                </span>
+                                                                                                                        </Link>
+                                                                                                                </DropdownMenuItem>
+                                                                                                                <DropdownMenuItem
+                                                                                                                        asChild
+                                                                                                                >
+                                                                                                                        <Link
+                                                                                                                                href="/admin/users"
+                                                                                                                                className="flex items-center space-x-2 cursor-pointer"
+                                                                                                                        >
+                                                                                                                                <Users className="h-4 w-4 hover:text-white" />
+                                                                                                                                <span>
+                                                                                                                                        Users
+                                                                                                                                </span>
+                                                                                                                        </Link>
+                                                                                                                </DropdownMenuItem>
+                                                                                                                <DropdownMenuItem
+                                                                                                                        asChild
+                                                                                                                >
+                                                                                                                        <Link
+                                                                                                                                href="/admin/resources"
+                                                                                                                                className="flex items-center space-x-2 cursor-pointer"
+                                                                                                                        >
+                                                                                                                                <BookOpen className="h-4 w-4 hover:text-white" />
+                                                                                                                                <span>
+                                                                                                                                        Resources
+                                                                                                                                </span>
+                                                                                                                        </Link>
+                                                                                                                </DropdownMenuItem>
+                                                                                                                <DropdownMenuItem
+                                                                                                                        asChild
+                                                                                                                >
+                                                                                                                        <Link
+                                                                                                                                href="/admin/analytics"
+                                                                                                                                className="flex items-center space-x-2 cursor-pointer"
+                                                                                                                        >
+                                                                                                                                <BarChart3 className="h-4 w-4 hover:text-white" />
+                                                                                                                                <span>
+                                                                                                                                        Analytics
+                                                                                                                                </span>
+                                                                                                                        </Link>
+                                                                                                                </DropdownMenuItem>
+                                                                                                                <DropdownMenuItem
+                                                                                                                        asChild
+                                                                                                                >
+                                                                                                                        <Link
+                                                                                                                                href="/admin/settings"
+                                                                                                                                className="flex items-center space-x-2 cursor-pointer"
+                                                                                                                        >
+                                                                                                                                <Settings className="h-4 w-4 hover:text-white" />
+                                                                                                                                <span>
+                                                                                                                                        Settings
+                                                                                                                                </span>
+                                                                                                                        </Link>
+                                                                                                                </DropdownMenuItem>
+                                                                                                        </DropdownMenuSubContent>
+                                                                                                </DropdownMenuSub>
+                                                                                        </>
+                                                                                )}
+
+                                                                                <DropdownMenuSeparator />
+                                                                                <DropdownMenuItem
+                                                                                        onClick={() => {
+                                                                                                localStorage.removeItem(
+                                                                                                        'userName',
+                                                                                                );
+                                                                                                signOut({
+                                                                                                        callbackUrl:
+                                                                                                                '/',
+                                                                                                });
+                                                                                        }}
+                                                                                        className="flex items-center space-x-2 cursor-pointer"
+                                                                                >
+                                                                                        <LogOut className="h-4 w-4 hover:text-white" />
+                                                                                        <span>Sign Out</span>
+                                                                                </DropdownMenuItem>
+                                                                        </DropdownMenuContent>
+                                                                </DropdownMenu>
                                                         </div>
                                                 ) : (
                                                         <div className="flex items-center space-x-3">
@@ -260,11 +325,17 @@ export function Navbar() {
                                                 <div className="px-2 pt-2 pb-3 space-y-1 border-t border-border">
                                                         {navigation.map((item) => {
                                                                 const Icon = item.icon;
+                                                                const active = isActive(item.href);
                                                                 return (
                                                                         <Link
                                                                                 key={item.name}
                                                                                 href={item.href}
-                                                                                className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-muted-foreground hover:text-white hover:bg-primary rounded-md transition-colors"
+                                                                                className={cn(
+                                                                                        'flex items-center space-x-2 px-3 py-2 text-base font-medium rounded-md transition-colors',
+                                                                                        active
+                                                                                                ? 'bg-primary text-white'
+                                                                                                : 'text-muted-foreground hover:text-white hover:bg-primary',
+                                                                                )}
                                                                                 onClick={() => setIsMenuOpen(false)}
                                                                         >
                                                                                 <Icon className="h-5 w-5" />
@@ -284,16 +355,16 @@ export function Navbar() {
                                                                                 onClick={() => setIsMenuOpen(false)}
                                                                                 className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-muted-foreground hover:text-white hover:bg-primary rounded-md transition-colors"
                                                                         >
-                                                                                <BarChart3 className="h-5 w-5" />
-                                                                                <span>Dashboard</span>
+                                                                                <LayoutDashboardIcon className="h-5 w-5" />
+                                                                                <span>Overview</span>
                                                                         </Link>
                                                                         <Link
-                                                                                href="/admin/analytics"
+                                                                                href="/admin/users"
                                                                                 onClick={() => setIsMenuOpen(false)}
                                                                                 className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-muted-foreground hover:text-white hover:bg-primary rounded-md transition-colors"
                                                                         >
-                                                                                <BarChart3 className="h-5 w-5" />
-                                                                                <span>Analytics</span>
+                                                                                <Users className="h-5 w-5" />
+                                                                                <span>Users</span>
                                                                         </Link>
                                                                         <Link
                                                                                 href="/admin/resources"
@@ -302,6 +373,14 @@ export function Navbar() {
                                                                         >
                                                                                 <BookOpen className="h-5 w-5" />
                                                                                 <span>Resources</span>
+                                                                        </Link>
+                                                                        <Link
+                                                                                href="/admin/analytics"
+                                                                                onClick={() => setIsMenuOpen(false)}
+                                                                                className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-muted-foreground hover:text-white hover:bg-primary rounded-md transition-colors"
+                                                                        >
+                                                                                <BarChart3 className="h-5 w-5" />
+                                                                                <span>Analytics</span>
                                                                         </Link>
                                                                         <Link
                                                                                 href="/admin/settings"
@@ -353,10 +432,11 @@ export function Navbar() {
                                                                                                 size="sm"
                                                                                                 className="w-full justify-start"
                                                                                         >
-                                                                                                <Settings className="size-5 mr-2" />
+                                                                                                <User className="size-5 mr-2" />
                                                                                                 Profile
                                                                                         </Button>
                                                                                 </Link>
+
                                                                                 <Button
                                                                                         onClick={() => {
                                                                                                 localStorage.removeItem(
@@ -387,7 +467,7 @@ export function Navbar() {
                                                                                         <Button
                                                                                                 variant="ghost"
                                                                                                 size="sm"
-                                                                                                className="w-full justify-start"
+                                                                                                className="w-full justify-start "
                                                                                         >
                                                                                                 Sign In
                                                                                         </Button>

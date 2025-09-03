@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import { Navbar } from '@/components/navbar';
@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-import { User, Phone, Target, Shield, Camera, Upload } from 'lucide-react';
+import { User, Phone, Target, Shield, Camera, Upload, Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface UserProfile {
@@ -35,6 +35,17 @@ export default function ProfilePage() {
         const [isLoading, setIsLoading] = useState(true);
         const [isSaving, setIsSaving] = useState(false);
         const [isUploading, setIsUploading] = useState(false);
+        const [isChangingPassword, setIsChangingPassword] = useState(false);
+        const [passwordData, setPasswordData] = useState({
+                currentPassword: '',
+                newPassword: '',
+                confirmPassword: '',
+        });
+        const [showPasswords, setShowPasswords] = useState({
+                current: false,
+                new: false,
+                confirm: false,
+        });
         const fileInputRef = useRef<HTMLInputElement>(null);
 
         useEffect(() => {
@@ -156,6 +167,51 @@ export default function ProfilePage() {
 
         const isOAuthUser = profile?.provider === 'google' || profile?.provider === 'github';
 
+        const handlePasswordChange = async () => {
+                if (passwordData.newPassword !== passwordData.confirmPassword) {
+                        toast.error('New passwords do not match');
+                        return;
+                }
+
+                if (passwordData.newPassword.length < 6) {
+                        toast.error('Password must be at least 6 characters long');
+                        return;
+                }
+
+                setIsChangingPassword(true);
+                try {
+                        const response = await fetch('/api/user/change-password', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                        currentPassword: passwordData.currentPassword,
+                                        newPassword: passwordData.newPassword,
+                                }),
+                        });
+
+                        if (response.ok) {
+                                toast.success('Password changed successfully! You will be signed out.');
+                                setPasswordData({
+                                        currentPassword: '',
+                                        newPassword: '',
+                                        confirmPassword: '',
+                                });
+                                // Sign out after 2 seconds
+                                setTimeout(() => {
+                                        signOut({ callbackUrl: '/sign-in' });
+                                }, 2000);
+                        } else {
+                                const error = await response.json();
+                                toast.error(error.error || 'Failed to change password');
+                        }
+                } catch (error) {
+                        console.error('Failed to change password:', error);
+                        toast.error('Failed to change password');
+                } finally {
+                        setIsChangingPassword(false);
+                }
+        };
+
         // Check if there are any changes compared to original profile (excluding email)
         const hasChanges =
                 originalProfile &&
@@ -191,7 +247,7 @@ export default function ProfilePage() {
                 <div className="min-h-screen bg-background">
                         <Navbar />
 
-                        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <main className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                                 <EmergencyBanner />
 
                                 <div className="mb-8">
@@ -220,6 +276,7 @@ export default function ProfilePage() {
                                                                                 <AvatarImage
                                                                                         src={profile?.image}
                                                                                         alt={profile?.name}
+                                                                                        className="object-cover"
                                                                                 />
                                                                                 <AvatarFallback className="text-lg">
                                                                                         {profile?.name
@@ -329,6 +386,176 @@ export default function ProfilePage() {
                                                         </div>
                                                 </CardContent>
                                         </Card>
+
+                                        {/* Change Password - Only for email users */}
+                                        {!isOAuthUser && (
+                                                <Card>
+                                                        <CardHeader>
+                                                                <CardTitle className="flex items-center space-x-2">
+                                                                        <Shield className="h-5 w-5" />
+                                                                        <span>Change Password</span>
+                                                                </CardTitle>
+                                                                <CardDescription>
+                                                                        Update your account password for security
+                                                                </CardDescription>
+                                                        </CardHeader>
+                                                        <CardContent className="space-y-4">
+                                                                <div className="space-y-2">
+                                                                        <Label htmlFor="currentPassword">
+                                                                                Current Password
+                                                                        </Label>
+                                                                        <div className="relative">
+                                                                                <Input
+                                                                                        id="currentPassword"
+                                                                                        type={
+                                                                                                showPasswords.current
+                                                                                                        ? 'text'
+                                                                                                        : 'password'
+                                                                                        }
+                                                                                        value={
+                                                                                                passwordData.currentPassword
+                                                                                        }
+                                                                                        onChange={(e) =>
+                                                                                                setPasswordData({
+                                                                                                        ...passwordData,
+                                                                                                        currentPassword:
+                                                                                                                e.target
+                                                                                                                        .value,
+                                                                                                })
+                                                                                        }
+                                                                                        placeholder="Enter your current password"
+                                                                                        className="bg-white border-primary/50 pr-10"
+                                                                                />
+                                                                                <Button
+                                                                                        type="button"
+                                                                                        variant="ghost"
+                                                                                        size="sm"
+                                                                                        className="absolute right-0 top-0 h-full px-3"
+                                                                                        tabIndex={-1}
+                                                                                        onClick={() =>
+                                                                                                setShowPasswords({
+                                                                                                        ...showPasswords,
+                                                                                                        current: !showPasswords.current,
+                                                                                                })
+                                                                                        }
+                                                                                >
+                                                                                        {showPasswords.current ? (
+                                                                                                <EyeOff className="h-4 w-4 hover:text-primary" />
+                                                                                        ) : (
+                                                                                                <Eye className="h-4 w-4 hover:text-primary" />
+                                                                                        )}
+                                                                                </Button>
+                                                                        </div>
+                                                                </div>
+                                                                <div className="space-y-2">
+                                                                        <Label htmlFor="newPassword">
+                                                                                New Password
+                                                                        </Label>
+                                                                        <div className="relative">
+                                                                                <Input
+                                                                                        id="newPassword"
+                                                                                        type={
+                                                                                                showPasswords.new
+                                                                                                        ? 'text'
+                                                                                                        : 'password'
+                                                                                        }
+                                                                                        value={passwordData.newPassword}
+                                                                                        onChange={(e) =>
+                                                                                                setPasswordData({
+                                                                                                        ...passwordData,
+                                                                                                        newPassword:
+                                                                                                                e.target
+                                                                                                                        .value,
+                                                                                                })
+                                                                                        }
+                                                                                        placeholder="Enter your new password"
+                                                                                        className="bg-white border-primary/50 pr-10"
+                                                                                />
+                                                                                <Button
+                                                                                        type="button"
+                                                                                        variant="ghost"
+                                                                                        size="sm"
+                                                                                        className="absolute right-0 top-0 h-full px-3"
+                                                                                        tabIndex={-1}
+                                                                                        onClick={() =>
+                                                                                                setShowPasswords({
+                                                                                                        ...showPasswords,
+                                                                                                        new: !showPasswords.new,
+                                                                                                })
+                                                                                        }
+                                                                                >
+                                                                                        {showPasswords.new ? (
+                                                                                                <EyeOff className="h-4 w-4 hover:text-primary" />
+                                                                                        ) : (
+                                                                                                <Eye className="h-4 w-4 hover:text-primary" />
+                                                                                        )}
+                                                                                </Button>
+                                                                        </div>
+                                                                </div>
+                                                                <div className="space-y-2">
+                                                                        <Label htmlFor="confirmPassword">
+                                                                                Confirm New Password
+                                                                        </Label>
+                                                                        <div className="relative">
+                                                                                <Input
+                                                                                        id="confirmPassword"
+                                                                                        type={
+                                                                                                showPasswords.confirm
+                                                                                                        ? 'text'
+                                                                                                        : 'password'
+                                                                                        }
+                                                                                        value={
+                                                                                                passwordData.confirmPassword
+                                                                                        }
+                                                                                        onChange={(e) =>
+                                                                                                setPasswordData({
+                                                                                                        ...passwordData,
+                                                                                                        confirmPassword:
+                                                                                                                e.target
+                                                                                                                        .value,
+                                                                                                })
+                                                                                        }
+                                                                                        placeholder="Confirm your new password"
+                                                                                        className="bg-white border-primary/50 pr-10"
+                                                                                />
+                                                                                <Button
+                                                                                        type="button"
+                                                                                        variant="ghost"
+                                                                                        size="sm"
+                                                                                        className="absolute right-0 top-0 h-full px-3 hover:bg-primary"
+                                                                                        tabIndex={-1}
+                                                                                        onClick={() =>
+                                                                                                setShowPasswords({
+                                                                                                        ...showPasswords,
+                                                                                                        confirm: !showPasswords.confirm,
+                                                                                                })
+                                                                                        }
+                                                                                >
+                                                                                        {showPasswords.confirm ? (
+                                                                                                <EyeOff className="h-4 w-4 hover:text-primary" />
+                                                                                        ) : (
+                                                                                                <Eye className="h-4 w-4 hover:text-primary" />
+                                                                                        )}
+                                                                                </Button>
+                                                                        </div>
+                                                                </div>
+                                                                <Button
+                                                                        onClick={handlePasswordChange}
+                                                                        disabled={
+                                                                                isChangingPassword ||
+                                                                                !passwordData.currentPassword ||
+                                                                                !passwordData.newPassword ||
+                                                                                !passwordData.confirmPassword
+                                                                        }
+                                                                        className="w-full"
+                                                                >
+                                                                        {isChangingPassword
+                                                                                ? 'Changing Password...'
+                                                                                : 'Change Password'}
+                                                                </Button>
+                                                        </CardContent>
+                                                </Card>
+                                        )}
 
                                         {/* Emergency Contact */}
                                         <Card>

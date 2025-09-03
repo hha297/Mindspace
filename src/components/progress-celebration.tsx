@@ -158,13 +158,13 @@ export function ProgressCelebration({
 
                                         {averageMood < 3 && (
                                                 <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-200">
-                                                        <div className="flex items-center space-x-2 text-blue-700">
-                                                                <HandHeartIcon className="size-6" />
-                                                                <span className="font-medium text-sm">
+                                                        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2 text-blue-700">
+                                                                <HandHeartIcon className="size-6 flex-shrink-0" />
+                                                                <span className="font-medium text-sm text-center sm:text-left">
                                                                         Remember, it&apos;s okay to have difficult days.
                                                                         Life challenges everyone, no matter how kind
-                                                                        they are. Struggles don’t mean you’re not good
-                                                                        enough.
+                                                                        they are. Struggles don&apos;t mean you&apos;re
+                                                                        not good enough.
                                                                 </span>
                                                         </div>
                                                 </div>

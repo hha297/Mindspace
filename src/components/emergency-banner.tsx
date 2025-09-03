@@ -8,16 +8,16 @@ export function EmergencyBanner() {
         return (
                 <Alert className="border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive mb-6">
                         <AlertTriangle className="size-4 mt-1.5" />
-                        <AlertDescription className="flex items-center justify-between">
-                                <span className="text-sm">
+                        <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <span className="text-sm leading-relaxed">
                                         If you&apos;re having thoughts of self-harm or suicide, please reach out for
                                         help immediately.
                                 </span>
-                                <div className="flex gap-2 ml-4 cursor-pointer">
+                                <div className="flex gap-2 sm:ml-4">
                                         <Button
                                                 size="sm"
                                                 variant="destructive"
-                                                className="h-8"
+                                                className="h-8 flex-1 sm:flex-none"
                                                 onClick={() => window.open('tel:112', '_self')}
                                         >
                                                 <Phone className="h-3 w-3 mr-1" />
@@ -26,7 +26,7 @@ export function EmergencyBanner() {
                                         <Button
                                                 size="sm"
                                                 variant="outline"
-                                                className="h-8 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground bg-transparent"
+                                                className="h-8 flex-1 sm:flex-none border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground bg-transparent"
                                                 onClick={() => {}}
                                         >
                                                 Chat Now

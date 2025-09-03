@@ -233,34 +233,69 @@ export default function DashboardPage() {
                                 </div>
 
                                 {/* Main Content Grid */}
-                                <div className="grid lg:grid-cols-3 gap-8">
+                                <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
                                         {/* Left Column - Mood Tracker */}
-                                        <div className="lg:col-span-1 space-y-8">
+                                        <div className="lg:col-span-1 space-y-6 lg:space-y-8">
                                                 <MoodTracker onMoodLogged={handleMoodLogged} />
 
-                                                {/* Achievement System */}
+                                                {/* Achievement System - Desktop */}
+                                                <div className="hidden lg:block">
+                                                        {userStats && (
+                                                                <AchievementSystem
+                                                                        userStats={userStats}
+                                                                        onAchievementUnlocked={
+                                                                                handleAchievementUnlocked
+                                                                        }
+                                                                />
+                                                        )}
+                                                </div>
+                                        </div>
+
+                                        {/* Right Column - History and Charts */}
+                                        <div className="lg:col-span-2 space-y-6 lg:space-y-8">
+                                                {/* Mood History with enhanced styling */}
+                                                <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+                                                        <div className="p-6">
+                                                                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                                                                        Mood History
+                                                                </h3>
+                                                                <MoodHistory />
+                                                        </div>
+                                                </div>
+
+                                                {/* Mood Chart with enhanced styling */}
+                                                <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+                                                        <div className="p-6">
+                                                                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                                                                        Mood Trend
+                                                                </h3>
+                                                                <MoodChart />
+                                                        </div>
+                                                </div>
+
+                                                {/* Progress Celebration */}
                                                 {userStats && (
+                                                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
+                                                                <ProgressCelebration
+                                                                        totalMoodLogs={userStats.totalMoodLogs}
+                                                                        averageMood={userStats.averageMood}
+                                                                        streakCount={userStats.streakCount}
+                                                                />
+                                                        </div>
+                                                )}
+                                        </div>
+                                </div>
+
+                                {/* Achievement System - Mobile */}
+                                <div className="mt-6 lg:hidden">
+                                        {userStats && (
+                                                <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 rounded-lg p-6">
                                                         <AchievementSystem
                                                                 userStats={userStats}
                                                                 onAchievementUnlocked={handleAchievementUnlocked}
                                                         />
-                                                )}
-                                        </div>
-
-                                        {/* Right Column - History and Charts */}
-                                        <div className="lg:col-span-2 space-y-8">
-                                                {/* Progress Celebration */}
-                                                {userStats && (
-                                                        <ProgressCelebration
-                                                                totalMoodLogs={userStats.totalMoodLogs}
-                                                                averageMood={userStats.averageMood}
-                                                                streakCount={userStats.streakCount}
-                                                        />
-                                                )}
-
-                                                <MoodChart />
-                                                <MoodHistory />
-                                        </div>
+                                                </div>
+                                        )}
                                 </div>
 
                                 {/* Self-Help Tools */}
