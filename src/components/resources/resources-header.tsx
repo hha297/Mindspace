@@ -1,8 +1,5 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { BookOpen, Plus } from 'lucide-react';
-
 export function ResourcesHeader() {
         return (
                 <div className="mb-8">

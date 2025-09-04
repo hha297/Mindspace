@@ -151,7 +151,7 @@ export function MoodTracker({ onMoodLogged }: MoodTrackerProps) {
                                 {/* Mood Selection */}
                                 <div className="text-center">
                                         <Label className="text-base font-medium mb-3 block">Select your mood</Label>
-                                        <div className="space-y-3 max-w-md mx-auto">
+                                        <div className="space-y-3 mx-auto">
                                                 {moodOptions.map((mood) => (
                                                         <button
                                                                 key={mood.value}

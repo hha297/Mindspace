@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Heart, Flame, Trophy, BookOpen } from 'lucide-react';
+import { Flame, Trophy, BookOpen } from 'lucide-react';
 
 interface UserStats {
         streakCount: number;
@@ -39,13 +39,13 @@ export function StatsCards({ userStats }: StatsCardsProps) {
 
                         <Card className="bg-gradient-to-br from-pink-50 to-rose-50 border-pink-200">
                                 <CardContent className="p-4 text-center">
-                                        <div className="flex items-center justify-center mb-2">
-                                                <Heart className="h-6 w-6 text-pink-500" />
+                                        <div className="text-3xl mb-2">
+                                                {userStats?.averageMood ? getMoodEmoji(userStats.averageMood) : '😐'}
                                         </div>
                                         <div className="text-2xl font-bold text-pink-600">
-                                                {userStats?.averageMood ? getMoodEmoji(userStats.averageMood) : '😊'}
+                                                {userStats?.averageMood ? userStats.averageMood.toFixed(1) : '3.4'}
                                         </div>
-                                        <div className="text-sm text-pink-600">Average Mood</div>
+                                        <div className="text-sm text-pink-600">Avg Mood</div>
                                 </CardContent>
                         </Card>
 

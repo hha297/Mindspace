@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,6 @@ import {
         DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Edit3, MoreVertical, RotateCcw, Trash2, ArrowLeft } from 'lucide-react';
-import { DeleteDialog } from '@/components/delete-dialog';
 
 interface ChatHeaderProps {
         session: any;
