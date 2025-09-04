@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { Navbar } from '@/components/navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
+
 import {
         Send,
         Bot,
@@ -83,40 +83,40 @@ export default function ChatPage() {
 
         // Load chat sessions from database
         useEffect(() => {
+                const loadChatSessions = async () => {
+                        try {
+                                const response = await fetch('/api/chat/sessions');
+                                if (response.ok) {
+                                        const data = await response.json();
+                                        const sessions = data.sessions.map((session: ApiChatSession) => ({
+                                                _id: session._id,
+                                                title: session.title,
+                                                lastMessage: session.lastMessage,
+                                                timestamp: new Date(session.updatedAt),
+                                                messages: [], // We'll load messages when selecting a session
+                                        }));
+                                        setChatSessions(sessions);
+
+                                        // If no sessions exist, create a default one
+                                        if (sessions.length === 0) {
+                                                await createNewChat();
+                                        } else {
+                                                // Load the first session
+                                                await loadChatSession(sessions[0]._id);
+                                        }
+                                }
+                        } catch (error) {
+                                console.error('Error loading chat sessions:', error);
+                                toast.error('Failed to load chat sessions');
+                        } finally {
+                                setIsLoadingSessions(false);
+                        }
+                };
+
                 if (session?.user?.email) {
                         loadChatSessions();
                 }
         }, [session]);
-
-        const loadChatSessions = async () => {
-                try {
-                        const response = await fetch('/api/chat/sessions');
-                        if (response.ok) {
-                                const data = await response.json();
-                                const sessions = data.sessions.map((session: ApiChatSession) => ({
-                                        _id: session._id,
-                                        title: session.title,
-                                        lastMessage: session.lastMessage,
-                                        timestamp: new Date(session.updatedAt),
-                                        messages: [], // We'll load messages when selecting a session
-                                }));
-                                setChatSessions(sessions);
-
-                                // If no sessions exist, create a default one
-                                if (sessions.length === 0) {
-                                        await createNewChat();
-                                } else {
-                                        // Load the first session
-                                        await loadChatSession(sessions[0]._id);
-                                }
-                        }
-                } catch (error) {
-                        console.error('Error loading chat sessions:', error);
-                        toast.error('Failed to load chat sessions');
-                } finally {
-                        setIsLoadingSessions(false);
-                }
-        };
 
         const loadChatSession = async (sessionId: string) => {
                 try {

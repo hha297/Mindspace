@@ -41,15 +41,7 @@ export default function ProfilePage() {
                 newPassword: '',
                 confirmPassword: '',
         });
-        const getButtonStyle = () => {
-                if (session) {
-                        return {
-                                cursor: 'not-allowed',
-                                opacity: 0.6,
-                        } as React.CSSProperties;
-                }
-                return {};
-        };
+
         const [showPasswords, setShowPasswords] = useState({
                 current: false,
                 new: false,

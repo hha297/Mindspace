@@ -90,7 +90,7 @@ export default function AdminUsersPage() {
                 fetchUsers();
         };
 
-        const handleDeleteUser = async (userId: string, userName: string, userRole: string) => {
+        const handleDeleteUser = async (userId: string) => {
                 try {
                         setDeletingUsers((prev) => new Set(prev).add(userId));
                         const response = await fetch(`/api/admin/users/${userId}`, {
@@ -375,9 +375,6 @@ export default function AdminUsersPage() {
                                                                                                 onDelete={() =>
                                                                                                         handleDeleteUser(
                                                                                                                 user._id,
-                                                                                                                user.name ||
-                                                                                                                        user.email,
-                                                                                                                user.role,
                                                                                                         )
                                                                                                 }
                                                                                                 trigger={

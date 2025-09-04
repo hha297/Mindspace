@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { Navbar } from '@/components/navbar';
 import { Heart, BarChart3, BookOpen, Users, Shield, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
-export default function HomePage() {
+function HomePageContent() {
         const searchParams = useSearchParams();
         const { data: session } = useSession();
 
@@ -245,5 +245,13 @@ export default function HomePage() {
                                 </div>
                         </main>
                 </div>
+        );
+}
+
+export default function HomePage() {
+        return (
+                <Suspense fallback={<div>Loading...</div>}>
+                        <HomePageContent />
+                </Suspense>
         );
 }

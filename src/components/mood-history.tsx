@@ -323,7 +323,7 @@ export function MoodHistory() {
                                                                                                 : ''
                                                                                 }`}
                                                                         >
-                                                                                {log.tags.map((tag, index) => (
+                                                                                {log.tags.map((tag) => (
                                                                                         <Badge
                                                                                                 key={tag}
                                                                                                 variant="outline"
