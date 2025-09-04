@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +18,9 @@ import {
         Edit3,
         RotateCcw,
         MoreHorizontal,
+        MoreVertical,
         Search,
+        ArrowLeft,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DeleteDialog } from '@/components/delete-dialog';
@@ -70,7 +73,8 @@ interface ApiChatSessionDetail {
 }
 
 export default function ChatPage() {
-        const { data: session } = useSession();
+        const { data: session, status } = useSession();
+        const router = useRouter();
         const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
         const [currentSession, setCurrentSession] = useState<ChatSession | null>(null);
         const [input, setInput] = useState('');
@@ -79,7 +83,28 @@ export default function ChatPage() {
         const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
         const [editingTitle, setEditingTitle] = useState('');
         const [searchQuery, setSearchQuery] = useState('');
+        const [isMobileView, setIsMobileView] = useState(false);
+        const [showChatList, setShowChatList] = useState(true);
         const messagesEndRef = useRef<HTMLDivElement>(null);
+
+        // Check authentication status
+        useEffect(() => {
+                if (status === 'unauthenticated') {
+                        router.push('/sign-in');
+                }
+        }, [status, router]);
+
+        // Detect mobile view
+        useEffect(() => {
+                const checkMobile = () => {
+                        setIsMobileView(window.innerWidth < 768);
+                };
+
+                checkMobile();
+                window.addEventListener('resize', checkMobile);
+
+                return () => window.removeEventListener('resize', checkMobile);
+        }, []);
 
         // Load chat sessions from database
         useEffect(() => {
@@ -192,6 +217,9 @@ export default function ChatPage() {
 
         const selectChat = async (session: ChatSession) => {
                 await loadChatSession(session._id);
+                if (isMobileView) {
+                        setShowChatList(false);
+                }
         };
 
         const deleteChat = async (sessionId: string) => {
@@ -266,6 +294,11 @@ export default function ChatPage() {
         const cancelEditing = () => {
                 setEditingSessionId(null);
                 setEditingTitle('');
+        };
+
+        const goBackToChatList = () => {
+                setShowChatList(true);
+                setCurrentSession(null);
         };
 
         const updateChatSession = async (session: ChatSession) => {
@@ -430,6 +463,26 @@ export default function ChatPage() {
                 session.title.toLowerCase().includes(searchQuery.toLowerCase()),
         );
 
+        // Show loading while checking authentication
+        if (status === 'loading') {
+                return (
+                        <div className="min-h-screen bg-background">
+                                <Navbar />
+                                <div className="flex h-[calc(100vh-64px)] items-center justify-center">
+                                        <div className="text-center">
+                                                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                                                <p className="text-muted-foreground">Checking authentication...</p>
+                                        </div>
+                                </div>
+                        </div>
+                );
+        }
+
+        // Redirect if not authenticated
+        if (status === 'unauthenticated') {
+                return null; // Will redirect via useEffect
+        }
+
         if (isLoadingSessions) {
                 return (
                         <div className="min-h-screen bg-background">
@@ -448,49 +501,641 @@ export default function ChatPage() {
                 <div className="min-h-screen bg-background">
                         <Navbar />
 
-                        <div className="flex h-[calc(100vh-64px)]">
-                                {/* Sidebar - Chat History */}
-                                <div className="w-80 border-r bg-muted/30 flex flex-col">
-                                        <div className="p-4 border-b space-y-3">
-                                                <Button onClick={createNewChat} className="w-full" size="sm">
-                                                        <Plus className="h-4 w-4 mr-2" />
-                                                        New Chat
-                                                </Button>
-                                                <div className="relative">
-                                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                        <Input
-                                                                placeholder="Search chats..."
-                                                                value={searchQuery}
-                                                                onChange={(e) => setSearchQuery(e.target.value)}
-                                                                className="pl-9 h-8 text-sm"
-                                                        />
+                        {isMobileView ? (
+                                // Mobile View
+                                <div className="h-[calc(100vh-64px)]">
+                                        {showChatList ? (
+                                                // Chat List View
+                                                <div className="h-full flex flex-col">
+                                                        {/* Header */}
+                                                        <div className="p-4 border-b bg-background">
+                                                                <div className="flex items-center justify-between mb-3">
+                                                                        <h1 className="text-xl font-semibold">Chats</h1>
+                                                                        <Button onClick={createNewChat} size="sm">
+                                                                                <Plus className="h-4 w-4 mr-2" />
+                                                                                New Chat
+                                                                        </Button>
+                                                                </div>
+                                                                <div className="relative">
+                                                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                                        <Input
+                                                                                placeholder="Search chats..."
+                                                                                value={searchQuery}
+                                                                                onChange={(e) =>
+                                                                                        setSearchQuery(e.target.value)
+                                                                                }
+                                                                                className="pl-9 h-10 border-primary/50"
+                                                                        />
+                                                                </div>
+                                                        </div>
+
+                                                        {/* Chat List */}
+                                                        <div className="flex-1 overflow-y-auto">
+                                                                {filteredChatSessions.length === 0 && searchQuery ? (
+                                                                        <div className="p-4 text-center">
+                                                                                <p className="text-sm text-muted-foreground">
+                                                                                        No chats found matching &quot;
+                                                                                        {searchQuery}&quot;
+                                                                                </p>
+                                                                        </div>
+                                                                ) : (
+                                                                        filteredChatSessions.map((chatSession) => (
+                                                                                <div
+                                                                                        key={chatSession._id}
+                                                                                        className="p-4 border-b cursor-pointer hover:bg-muted/50 transition-colors"
+                                                                                        onClick={() =>
+                                                                                                selectChat(chatSession)
+                                                                                        }
+                                                                                >
+                                                                                        <div className="flex items-center justify-between">
+                                                                                                <div className="flex-1 min-w-0">
+                                                                                                        <h3 className="font-medium text-sm truncate mb-1">
+                                                                                                                {
+                                                                                                                        chatSession.title
+                                                                                                                }
+                                                                                                        </h3>
+                                                                                                        <p className="text-xs text-muted-foreground truncate">
+                                                                                                                {getLastMessagePreview(
+                                                                                                                        chatSession,
+                                                                                                                )}
+                                                                                                        </p>
+                                                                                                        <p className="text-xs text-muted-foreground mt-1">
+                                                                                                                {formatDate(
+                                                                                                                        chatSession.timestamp,
+                                                                                                                )}
+                                                                                                        </p>
+                                                                                                </div>
+                                                                                                <DropdownMenu>
+                                                                                                        <DropdownMenuTrigger
+                                                                                                                asChild
+                                                                                                        >
+                                                                                                                <Button
+                                                                                                                        variant="ghost"
+                                                                                                                        size="sm"
+                                                                                                                        className="h-8 w-8 p-0"
+                                                                                                                        onClick={(
+                                                                                                                                e,
+                                                                                                                        ) =>
+                                                                                                                                e.stopPropagation()
+                                                                                                                        }
+                                                                                                                >
+                                                                                                                        <MoreHorizontal className="h-4 w-4" />
+                                                                                                                </Button>
+                                                                                                        </DropdownMenuTrigger>
+                                                                                                        <DropdownMenuContent
+                                                                                                                align="end"
+                                                                                                                className="w-48"
+                                                                                                        >
+                                                                                                                <DropdownMenuItem
+                                                                                                                        onClick={() =>
+                                                                                                                                deleteChat(
+                                                                                                                                        chatSession._id,
+                                                                                                                                )
+                                                                                                                        }
+                                                                                                                        className="text-destructive"
+                                                                                                                >
+                                                                                                                        <Trash2 className="h-4 w-4 mr-2" />
+                                                                                                                        Delete
+                                                                                                                        Chat
+                                                                                                                </DropdownMenuItem>
+                                                                                                        </DropdownMenuContent>
+                                                                                                </DropdownMenu>
+                                                                                        </div>
+                                                                                </div>
+                                                                        ))
+                                                                )}
+                                                        </div>
+                                                </div>
+                                        ) : (
+                                                // Individual Chat View
+                                                <div className="h-full flex flex-col">
+                                                        {currentSession && (
+                                                                <>
+                                                                        {/* Chat Header */}
+                                                                        <div className="p-4 border-b bg-background">
+                                                                                <div className="flex items-center justify-between">
+                                                                                        <div className="flex items-center space-x-3">
+                                                                                                <Button
+                                                                                                        variant="ghost"
+                                                                                                        size="sm"
+                                                                                                        onClick={
+                                                                                                                goBackToChatList
+                                                                                                        }
+                                                                                                        className="h-8 w-8 p-0"
+                                                                                                >
+                                                                                                        <ArrowLeft className="h-4 w-4" />
+                                                                                                </Button>
+                                                                                                <div className="flex-1">
+                                                                                                        {editingSessionId ===
+                                                                                                        currentSession._id ? (
+                                                                                                                <div className="flex items-center space-x-2">
+                                                                                                                        <Input
+                                                                                                                                value={
+                                                                                                                                        editingTitle
+                                                                                                                                }
+                                                                                                                                onChange={(
+                                                                                                                                        e,
+                                                                                                                                ) =>
+                                                                                                                                        setEditingTitle(
+                                                                                                                                                e
+                                                                                                                                                        .target
+                                                                                                                                                        .value,
+                                                                                                                                        )
+                                                                                                                                }
+                                                                                                                                onKeyPress={(
+                                                                                                                                        e,
+                                                                                                                                ) => {
+                                                                                                                                        if (
+                                                                                                                                                e.key ===
+                                                                                                                                                'Enter'
+                                                                                                                                        )
+                                                                                                                                                saveTitle();
+                                                                                                                                        if (
+                                                                                                                                                e.key ===
+                                                                                                                                                'Escape'
+                                                                                                                                        )
+                                                                                                                                                cancelEditing();
+                                                                                                                                }}
+                                                                                                                                className="text-lg font-semibold h-8 px-2 border-primary/50"
+                                                                                                                                autoFocus
+                                                                                                                        />
+                                                                                                                        <Button
+                                                                                                                                size="sm"
+                                                                                                                                variant="ghost"
+                                                                                                                                onClick={
+                                                                                                                                        saveTitle
+                                                                                                                                }
+                                                                                                                                className="h-8 w-8 p-0"
+                                                                                                                        >
+                                                                                                                                <RotateCcw className="h-4 w-4" />
+                                                                                                                        </Button>
+                                                                                                                        <Button
+                                                                                                                                size="sm"
+                                                                                                                                variant="ghost"
+                                                                                                                                onClick={
+                                                                                                                                        cancelEditing
+                                                                                                                                }
+                                                                                                                                className="h-8 px-2"
+                                                                                                                        >
+                                                                                                                                <span className="text-sm">
+                                                                                                                                        Cancel
+                                                                                                                                </span>
+                                                                                                                        </Button>
+                                                                                                                </div>
+                                                                                                        ) : (
+                                                                                                                <>
+                                                                                                                        <h2 className="text-lg font-semibold truncate">
+                                                                                                                                {
+                                                                                                                                        currentSession.title
+                                                                                                                                }
+                                                                                                                        </h2>
+                                                                                                                        <p className="text-sm text-muted-foreground">
+                                                                                                                                Mental
+                                                                                                                                Health
+                                                                                                                                Support
+                                                                                                                                Chat
+                                                                                                                        </p>
+                                                                                                                </>
+                                                                                                        )}
+                                                                                                </div>
+                                                                                        </div>
+                                                                                        {editingSessionId !==
+                                                                                                currentSession._id && (
+                                                                                                <DropdownMenu>
+                                                                                                        <DropdownMenuTrigger
+                                                                                                                asChild
+                                                                                                        >
+                                                                                                                <Button
+                                                                                                                        variant="ghost"
+                                                                                                                        size="sm"
+                                                                                                                        className="h-8 w-8 p-0"
+                                                                                                                >
+                                                                                                                        <MoreVertical className="h-4 w-4" />
+                                                                                                                </Button>
+                                                                                                        </DropdownMenuTrigger>
+                                                                                                        <DropdownMenuContent
+                                                                                                                align="end"
+                                                                                                                className="w-48"
+                                                                                                        >
+                                                                                                                <DropdownMenuItem
+                                                                                                                        onClick={() =>
+                                                                                                                                startEditing(
+                                                                                                                                        currentSession,
+                                                                                                                                )
+                                                                                                                        }
+                                                                                                                >
+                                                                                                                        <Edit3 className="h-4 w-4 mr-2 hover:text-white" />
+                                                                                                                        Rename
+                                                                                                                </DropdownMenuItem>
+                                                                                                                <DropdownMenuItem
+                                                                                                                        onClick={() =>
+                                                                                                                                deleteChat(
+                                                                                                                                        currentSession._id,
+                                                                                                                                )
+                                                                                                                        }
+                                                                                                                        className="text-destructive"
+                                                                                                                >
+                                                                                                                        <Trash2 className="h-4 w-4 mr-2 hover:text-white" />
+                                                                                                                        Delete
+                                                                                                                </DropdownMenuItem>
+                                                                                                        </DropdownMenuContent>
+                                                                                                </DropdownMenu>
+                                                                                        )}
+                                                                                </div>
+                                                                        </div>
+
+                                                                        {/* Messages Area */}
+                                                                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                                                                                {currentSession.messages.map(
+                                                                                        (message) => (
+                                                                                                <div
+                                                                                                        key={message.id}
+                                                                                                        className={`flex ${
+                                                                                                                message.role ===
+                                                                                                                'user'
+                                                                                                                        ? 'justify-end'
+                                                                                                                        : 'justify-start'
+                                                                                                        }`}
+                                                                                                >
+                                                                                                        <div
+                                                                                                                className={`flex items-start space-x-2 max-w-[85%] ${
+                                                                                                                        message.role ===
+                                                                                                                        'user'
+                                                                                                                                ? 'flex-row-reverse space-x-reverse'
+                                                                                                                                : ''
+                                                                                                                }`}
+                                                                                                        >
+                                                                                                                <div
+                                                                                                                        className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                                                                                                                message.role ===
+                                                                                                                                'user'
+                                                                                                                                        ? 'bg-primary text-primary-foreground'
+                                                                                                                                        : 'bg-muted text-muted-foreground'
+                                                                                                                        }`}
+                                                                                                                >
+                                                                                                                        {message.role ===
+                                                                                                                        'user' ? (
+                                                                                                                                session
+                                                                                                                                        ?.user
+                                                                                                                                        ?.image ? (
+                                                                                                                                        <Image
+                                                                                                                                                width={
+                                                                                                                                                        32
+                                                                                                                                                }
+                                                                                                                                                height={
+                                                                                                                                                        32
+                                                                                                                                                }
+                                                                                                                                                src={
+                                                                                                                                                        session
+                                                                                                                                                                .user
+                                                                                                                                                                .image
+                                                                                                                                                }
+                                                                                                                                                alt="User avatar"
+                                                                                                                                                className="w-8 h-8 rounded-full"
+                                                                                                                                        />
+                                                                                                                                ) : (
+                                                                                                                                        <User className="h-4 w-4" />
+                                                                                                                                )
+                                                                                                                        ) : (
+                                                                                                                                <Bot className="h-4 w-4" />
+                                                                                                                        )}
+                                                                                                                </div>
+                                                                                                                <div
+                                                                                                                        className={`rounded-lg px-3 py-2 ${
+                                                                                                                                message.role ===
+                                                                                                                                'user'
+                                                                                                                                        ? 'bg-primary text-primary-foreground'
+                                                                                                                                        : 'bg-muted text-foreground'
+                                                                                                                        }`}
+                                                                                                                >
+                                                                                                                        <p className="text-sm whitespace-pre-wrap">
+                                                                                                                                {
+                                                                                                                                        message.content
+                                                                                                                                }
+                                                                                                                        </p>
+                                                                                                                        <p className="text-xs opacity-70 mt-1">
+                                                                                                                                {formatTime(
+                                                                                                                                        message.timestamp,
+                                                                                                                                )}
+                                                                                                                        </p>
+                                                                                                                </div>
+                                                                                                        </div>
+                                                                                                </div>
+                                                                                        ),
+                                                                                )}
+
+                                                                                {isLoading && (
+                                                                                        <div className="flex justify-start">
+                                                                                                <div className="flex items-start space-x-2">
+                                                                                                        <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
+                                                                                                                <Bot className="h-4 w-4" />
+                                                                                                        </div>
+                                                                                                        <div className="bg-muted text-foreground rounded-lg px-3 py-2">
+                                                                                                                <div className="flex items-center space-x-2">
+                                                                                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                                                                                        <span className="text-sm">
+                                                                                                                                Typing...
+                                                                                                                        </span>
+                                                                                                                </div>
+                                                                                                        </div>
+                                                                                                </div>
+                                                                                        </div>
+                                                                                )}
+                                                                                <div ref={messagesEndRef} />
+                                                                        </div>
+
+                                                                        {/* Input Area */}
+                                                                        <div className="p-4 border-t bg-background">
+                                                                                <div className="flex space-x-2">
+                                                                                        <div className="relative flex-1">
+                                                                                                <Input
+                                                                                                        value={input}
+                                                                                                        onChange={(e) =>
+                                                                                                                setInput(
+                                                                                                                        e
+                                                                                                                                .target
+                                                                                                                                .value,
+                                                                                                                )
+                                                                                                        }
+                                                                                                        onKeyPress={
+                                                                                                                handleKeyPress
+                                                                                                        }
+                                                                                                        placeholder="Type your message..."
+                                                                                                        disabled={
+                                                                                                                isLoading
+                                                                                                        }
+                                                                                                        className="flex-1 border-primary/50"
+                                                                                                />
+                                                                                        </div>
+                                                                                        <Button
+                                                                                                onClick={sendMessage}
+                                                                                                disabled={
+                                                                                                        !input.trim() ||
+                                                                                                        isLoading
+                                                                                                }
+                                                                                                size="icon"
+                                                                                        >
+                                                                                                <Send className="h-4 w-4" />
+                                                                                        </Button>
+                                                                                </div>
+                                                                        </div>
+                                                                </>
+                                                        )}
+                                                </div>
+                                        )}
+                                </div>
+                        ) : (
+                                // Desktop View (Original Layout)
+                                <div className="flex h-[calc(100vh-64px)]">
+                                        {/* Sidebar - Chat History */}
+                                        <div className="w-80 border-r bg-muted/30 flex flex-col">
+                                                <div className="p-4 border-b space-y-3">
+                                                        <Button onClick={createNewChat} className="w-full" size="sm">
+                                                                <Plus className="h-4 w-4 mr-2" />
+                                                                New Chat
+                                                        </Button>
+                                                        <div className="relative">
+                                                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                                <Input
+                                                                        placeholder="Search chats..."
+                                                                        value={searchQuery}
+                                                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                                                        className="pl-9 h-8 text-sm border-primary/50"
+                                                                />
+                                                        </div>
+                                                </div>
+
+                                                <div className="flex-1 overflow-y-auto">
+                                                        {filteredChatSessions.length === 0 && searchQuery ? (
+                                                                <div className="p-4 text-center">
+                                                                        <p className="text-sm text-muted-foreground">
+                                                                                No chats found matching &quot;
+                                                                                {searchQuery}
+                                                                                &quot;
+                                                                        </p>
+                                                                </div>
+                                                        ) : (
+                                                                filteredChatSessions.map((chatSession) => (
+                                                                        <div
+                                                                                key={chatSession._id}
+                                                                                className={`p-4 border-b cursor-pointer hover:bg-muted/50 transition-colors group ${
+                                                                                        currentSession?._id ===
+                                                                                        chatSession._id
+                                                                                                ? 'bg-muted'
+                                                                                                : ''
+                                                                                }`}
+                                                                                onClick={() => selectChat(chatSession)}
+                                                                        >
+                                                                                <div className="flex-1 min-w-0">
+                                                                                        <div className="flex items-center justify-between">
+                                                                                                <h3 className="font-medium text-sm truncate">
+                                                                                                        {
+                                                                                                                chatSession.title
+                                                                                                        }
+                                                                                                </h3>
+                                                                                                <DropdownMenu>
+                                                                                                        <DropdownMenuTrigger
+                                                                                                                asChild
+                                                                                                        >
+                                                                                                                <Button
+                                                                                                                        variant="ghost"
+                                                                                                                        size="sm"
+                                                                                                                        className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                                                                        onClick={(
+                                                                                                                                e,
+                                                                                                                        ) =>
+                                                                                                                                e.stopPropagation()
+                                                                                                                        }
+                                                                                                                >
+                                                                                                                        <MoreHorizontal className="h-3 w-3" />
+                                                                                                                </Button>
+                                                                                                        </DropdownMenuTrigger>
+                                                                                                        <DropdownMenuContent align="end">
+                                                                                                                <DeleteDialog
+                                                                                                                        title="Delete Chat"
+                                                                                                                        description={`Are you sure you want to delete "${chatSession.title}"? This action will delete all messages in the chat and cannot be undone.`}
+                                                                                                                        onDelete={() =>
+                                                                                                                                deleteChat(
+                                                                                                                                        chatSession._id,
+                                                                                                                                )
+                                                                                                                        }
+                                                                                                                        trigger={
+                                                                                                                                <DropdownMenuItem
+                                                                                                                                        onSelect={(
+                                                                                                                                                e,
+                                                                                                                                        ) =>
+                                                                                                                                                e.preventDefault()
+                                                                                                                                        }
+                                                                                                                                        className="cursor-pointer text-destructive"
+                                                                                                                                >
+                                                                                                                                        <Trash2 className="h-4 w-4 mr-2 hover:text-white" />
+                                                                                                                                        Delete
+                                                                                                                                        Chat
+                                                                                                                                </DropdownMenuItem>
+                                                                                                                        }
+                                                                                                                />
+                                                                                                        </DropdownMenuContent>
+                                                                                                </DropdownMenu>
+                                                                                        </div>
+
+                                                                                        {/* Message preview with role indicators */}
+                                                                                        <div className="mt-1">
+                                                                                                {chatSession.messages
+                                                                                                        .length > 0 ? (
+                                                                                                        <div className="flex items-center space-x-1">
+                                                                                                                {chatSession
+                                                                                                                        .messages[
+                                                                                                                        chatSession
+                                                                                                                                .messages
+                                                                                                                                .length -
+                                                                                                                                1
+                                                                                                                ]
+                                                                                                                        .role ===
+                                                                                                                'assistant' ? (
+                                                                                                                        <>
+                                                                                                                                <span className="text-xs text-muted-foreground font-bold">
+                                                                                                                                        Bot:
+                                                                                                                                </span>
+                                                                                                                                <p className="text-xs font-bold text-muted-foreground truncate flex-1">
+                                                                                                                                        {getLastMessagePreview(
+                                                                                                                                                chatSession,
+                                                                                                                                        )}
+                                                                                                                                </p>
+                                                                                                                        </>
+                                                                                                                ) : (
+                                                                                                                        <>
+                                                                                                                                <span className="text-xs text-muted-foreground">
+                                                                                                                                        Me:
+                                                                                                                                </span>
+                                                                                                                                <p className="text-xs text-muted-foreground truncate flex-1">
+                                                                                                                                        {getLastMessagePreview(
+                                                                                                                                                chatSession,
+                                                                                                                                        )}
+                                                                                                                                </p>
+                                                                                                                                <Send className="h-3 w-3 text-muted-foreground" />
+                                                                                                                        </>
+                                                                                                                )}
+                                                                                                        </div>
+                                                                                                ) : (
+                                                                                                        <div className="flex items-center space-x-1">
+                                                                                                                <span className="text-xs text-muted-foreground font-bold">
+                                                                                                                        Bot:
+                                                                                                                </span>
+                                                                                                                <p className="text-xs font-bold text-muted-foreground truncate flex-1">
+                                                                                                                        {
+                                                                                                                                chatSession.lastMessage
+                                                                                                                        }
+                                                                                                                </p>
+                                                                                                        </div>
+                                                                                                )}
+                                                                                        </div>
+
+                                                                                        <p className="text-xs text-muted-foreground mt-1">
+                                                                                                {formatDate(
+                                                                                                        chatSession.timestamp,
+                                                                                                )}
+                                                                                        </p>
+                                                                                </div>
+                                                                        </div>
+                                                                ))
+                                                        )}
                                                 </div>
                                         </div>
 
-                                        <div className="flex-1 overflow-y-auto">
-                                                {filteredChatSessions.length === 0 && searchQuery ? (
-                                                        <div className="p-4 text-center">
-                                                                <p className="text-sm text-muted-foreground">
-                                                                        No chats found matching &quot;{searchQuery}
-                                                                        &quot;
-                                                                </p>
-                                                        </div>
-                                                ) : (
-                                                        filteredChatSessions.map((chatSession) => (
-                                                                <div
-                                                                        key={chatSession._id}
-                                                                        className={`p-4 border-b cursor-pointer hover:bg-muted/50 transition-colors group ${
-                                                                                currentSession?._id === chatSession._id
-                                                                                        ? 'bg-muted'
-                                                                                        : ''
-                                                                        }`}
-                                                                        onClick={() => selectChat(chatSession)}
-                                                                >
-                                                                        <div className="flex-1 min-w-0">
-                                                                                <div className="flex items-center justify-between">
-                                                                                        <h3 className="font-medium text-sm truncate">
-                                                                                                {chatSession.title}
-                                                                                        </h3>
+                                        {/* Main Chat Area */}
+                                        <div className="flex-1 flex flex-col">
+                                                {currentSession ? (
+                                                        <>
+                                                                {/* Chat Header */}
+                                                                <div className="p-4 border-b bg-background">
+                                                                        <div className="flex items-center justify-between">
+                                                                                <div className="flex-1">
+                                                                                        {editingSessionId ===
+                                                                                        currentSession._id ? (
+                                                                                                <div className="flex items-center space-x-2">
+                                                                                                        <Input
+                                                                                                                value={
+                                                                                                                        editingTitle
+                                                                                                                }
+                                                                                                                onChange={(
+                                                                                                                        e,
+                                                                                                                ) =>
+                                                                                                                        setEditingTitle(
+                                                                                                                                e
+                                                                                                                                        .target
+                                                                                                                                        .value,
+                                                                                                                        )
+                                                                                                                }
+                                                                                                                onKeyPress={(
+                                                                                                                        e,
+                                                                                                                ) => {
+                                                                                                                        if (
+                                                                                                                                e.key ===
+                                                                                                                                'Enter'
+                                                                                                                        )
+                                                                                                                                saveTitle();
+                                                                                                                        if (
+                                                                                                                                e.key ===
+                                                                                                                                'Escape'
+                                                                                                                        )
+                                                                                                                                cancelEditing();
+                                                                                                                }}
+                                                                                                                className="text-lg font-semibold h-8 px-2 w-48 border-primary/50"
+                                                                                                                autoFocus
+                                                                                                        />
+                                                                                                        <Button
+                                                                                                                size="sm"
+                                                                                                                variant="ghost"
+                                                                                                                onClick={
+                                                                                                                        saveTitle
+                                                                                                                }
+                                                                                                                className="h-8 w-8 p-0"
+                                                                                                        >
+                                                                                                                <RotateCcw className="h-4 w-4" />
+                                                                                                        </Button>
+                                                                                                        <Button
+                                                                                                                size="sm"
+                                                                                                                variant="ghost"
+                                                                                                                onClick={
+                                                                                                                        cancelEditing
+                                                                                                                }
+                                                                                                                className="h-8 px-2"
+                                                                                                        >
+                                                                                                                <span className="text-sm">
+                                                                                                                        Cancel
+                                                                                                                </span>
+                                                                                                        </Button>
+                                                                                                </div>
+                                                                                        ) : (
+                                                                                                <div className="flex items-center space-x-2 group">
+                                                                                                        <h2 className="text-lg font-semibold">
+                                                                                                                {
+                                                                                                                        currentSession.title
+                                                                                                                }
+                                                                                                        </h2>
+                                                                                                        <Button
+                                                                                                                size="sm"
+                                                                                                                variant="ghost"
+                                                                                                                onClick={() =>
+                                                                                                                        startEditing(
+                                                                                                                                currentSession,
+                                                                                                                        )
+                                                                                                                }
+                                                                                                                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                                                        >
+                                                                                                                <Edit3 className="h-4 w-4" />
+                                                                                                        </Button>
+                                                                                                </div>
+                                                                                        )}
+                                                                                        <p className="text-sm text-muted-foreground">
+                                                                                                Mental Health Support
+                                                                                                Chat
+                                                                                        </p>
+                                                                                </div>
+
+                                                                                {/* More options button on the right */}
+                                                                                {editingSessionId !==
+                                                                                        currentSession._id && (
                                                                                         <DropdownMenu>
                                                                                                 <DropdownMenuTrigger
                                                                                                         asChild
@@ -498,355 +1143,189 @@ export default function ChatPage() {
                                                                                                         <Button
                                                                                                                 variant="ghost"
                                                                                                                 size="sm"
-                                                                                                                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                                                                                onClick={(
-                                                                                                                        e,
-                                                                                                                ) =>
-                                                                                                                        e.stopPropagation()
-                                                                                                                }
+                                                                                                                className="h-8 w-8 p-0"
                                                                                                         >
-                                                                                                                <MoreHorizontal className="h-3 w-3" />
+                                                                                                                <MoreVertical className="h-4 w-4" />
                                                                                                         </Button>
                                                                                                 </DropdownMenuTrigger>
-                                                                                                <DropdownMenuContent align="end">
-                                                                                                        <DeleteDialog
-                                                                                                                title="Delete Chat"
-                                                                                                                description={`Are you sure you want to delete "${chatSession.title}"? This action will delete all messages in the chat and cannot be undone.`}
-                                                                                                                onDelete={() =>
-                                                                                                                        deleteChat(
-                                                                                                                                chatSession._id,
+                                                                                                <DropdownMenuContent
+                                                                                                        align="end"
+                                                                                                        className="w-48"
+                                                                                                >
+                                                                                                        <DropdownMenuItem
+                                                                                                                onClick={() =>
+                                                                                                                        startEditing(
+                                                                                                                                currentSession,
                                                                                                                         )
                                                                                                                 }
-                                                                                                                trigger={
-                                                                                                                        <DropdownMenuItem
-                                                                                                                                onSelect={(
-                                                                                                                                        e,
-                                                                                                                                ) =>
-                                                                                                                                        e.preventDefault()
-                                                                                                                                }
-                                                                                                                                className="cursor-pointer text-destructive"
-                                                                                                                        >
-                                                                                                                                <Trash2 className="h-4 w-4 mr-2 hover:text-white" />
-                                                                                                                                Delete
-                                                                                                                                Chat
-                                                                                                                        </DropdownMenuItem>
+                                                                                                        >
+                                                                                                                <Edit3 className="h-4 w-4 mr-2 hover:text-white" />
+                                                                                                                Rename
+                                                                                                        </DropdownMenuItem>
+                                                                                                        <DropdownMenuItem
+                                                                                                                onClick={() =>
+                                                                                                                        deleteChat(
+                                                                                                                                currentSession._id,
+                                                                                                                        )
                                                                                                                 }
-                                                                                                        />
+                                                                                                                className="text-destructive"
+                                                                                                        >
+                                                                                                                <Trash2 className="h-4 w-4 mr-2 hover:text-white" />
+                                                                                                                Delete
+                                                                                                        </DropdownMenuItem>
                                                                                                 </DropdownMenuContent>
                                                                                         </DropdownMenu>
-                                                                                </div>
-
-                                                                                {/* Message preview with role indicators */}
-                                                                                <div className="mt-1">
-                                                                                        {chatSession.messages.length >
-                                                                                        0 ? (
-                                                                                                <div className="flex items-center space-x-1">
-                                                                                                        {chatSession
-                                                                                                                .messages[
-                                                                                                                chatSession
-                                                                                                                        .messages
-                                                                                                                        .length -
-                                                                                                                        1
-                                                                                                        ].role ===
-                                                                                                        'assistant' ? (
-                                                                                                                <>
-                                                                                                                        <span className="text-xs text-muted-foreground font-bold">
-                                                                                                                                Bot:
-                                                                                                                        </span>
-                                                                                                                        <p className="text-xs font-bold text-muted-foreground truncate flex-1">
-                                                                                                                                {getLastMessagePreview(
-                                                                                                                                        chatSession,
-                                                                                                                                )}
-                                                                                                                        </p>
-                                                                                                                </>
-                                                                                                        ) : (
-                                                                                                                <>
-                                                                                                                        <span className="text-xs text-muted-foreground">
-                                                                                                                                Me:
-                                                                                                                        </span>
-                                                                                                                        <p className="text-xs text-muted-foreground truncate flex-1">
-                                                                                                                                {getLastMessagePreview(
-                                                                                                                                        chatSession,
-                                                                                                                                )}
-                                                                                                                        </p>
-                                                                                                                        <Send className="h-3 w-3 text-muted-foreground" />
-                                                                                                                </>
-                                                                                                        )}
-                                                                                                </div>
-                                                                                        ) : (
-                                                                                                <div className="flex items-center space-x-1">
-                                                                                                        <span className="text-xs text-muted-foreground font-bold">
-                                                                                                                Bot:
-                                                                                                        </span>
-                                                                                                        <p className="text-xs font-bold text-muted-foreground truncate flex-1">
-                                                                                                                {
-                                                                                                                        chatSession.lastMessage
-                                                                                                                }
-                                                                                                        </p>
-                                                                                                </div>
-                                                                                        )}
-                                                                                </div>
-
-                                                                                <p className="text-xs text-muted-foreground mt-1">
-                                                                                        {formatDate(
-                                                                                                chatSession.timestamp,
-                                                                                        )}
-                                                                                </p>
-                                                                        </div>
-                                                                </div>
-                                                        ))
-                                                )}
-                                        </div>
-                                </div>
-
-                                {/* Main Chat Area */}
-                                <div className="flex-1 flex flex-col">
-                                        {currentSession ? (
-                                                <>
-                                                        {/* Chat Header */}
-                                                        <div className="p-4 border-b bg-background">
-                                                                <div className="flex items-center justify-between">
-                                                                        <div className="flex-1">
-                                                                                {editingSessionId ===
-                                                                                currentSession._id ? (
-                                                                                        <div className="flex items-center space-x-2">
-                                                                                                <Input
-                                                                                                        value={
-                                                                                                                editingTitle
-                                                                                                        }
-                                                                                                        onChange={(e) =>
-                                                                                                                setEditingTitle(
-                                                                                                                        e
-                                                                                                                                .target
-                                                                                                                                .value,
-                                                                                                                )
-                                                                                                        }
-                                                                                                        onKeyPress={(
-                                                                                                                e,
-                                                                                                        ) => {
-                                                                                                                if (
-                                                                                                                        e.key ===
-                                                                                                                        'Enter'
-                                                                                                                )
-                                                                                                                        saveTitle();
-                                                                                                                if (
-                                                                                                                        e.key ===
-                                                                                                                        'Escape'
-                                                                                                                )
-                                                                                                                        cancelEditing();
-                                                                                                        }}
-                                                                                                        className="text-lg font-semibold h-8 px-2 w-48 border-primary/50"
-                                                                                                        autoFocus
-                                                                                                />
-                                                                                                <Button
-                                                                                                        size="sm"
-                                                                                                        variant="ghost"
-                                                                                                        onClick={
-                                                                                                                saveTitle
-                                                                                                        }
-                                                                                                        className="h-8 w-8 p-0"
-                                                                                                >
-                                                                                                        <RotateCcw className="h-4 w-4" />
-                                                                                                </Button>
-                                                                                                <Button
-                                                                                                        size="sm"
-                                                                                                        variant="ghost"
-                                                                                                        onClick={
-                                                                                                                cancelEditing
-                                                                                                        }
-                                                                                                        className="h-8 px-2"
-                                                                                                >
-                                                                                                        <span className="text-sm">
-                                                                                                                Cancel
-                                                                                                        </span>
-                                                                                                </Button>
-                                                                                        </div>
-                                                                                ) : (
-                                                                                        <div className="flex items-center space-x-2 group">
-                                                                                                <h2 className="text-lg font-semibold">
-                                                                                                        {
-                                                                                                                currentSession.title
-                                                                                                        }
-                                                                                                </h2>
-                                                                                                <Button
-                                                                                                        size="sm"
-                                                                                                        variant="ghost"
-                                                                                                        onClick={() =>
-                                                                                                                startEditing(
-                                                                                                                        currentSession,
-                                                                                                                )
-                                                                                                        }
-                                                                                                        className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                                                                >
-                                                                                                        <Edit3 className="h-4 w-4" />
-                                                                                                </Button>
-                                                                                        </div>
                                                                                 )}
-                                                                                <p className="text-sm text-muted-foreground">
-                                                                                        Mental Health Support Chat
-                                                                                </p>
                                                                         </div>
-
-                                                                        {/* Delete button on the right */}
-                                                                        {editingSessionId !== currentSession._id && (
-                                                                                <DeleteDialog
-                                                                                        title="Delete Chat"
-                                                                                        description={`Are you sure you want to delete "${currentSession.title}"? This action will delete all messages in the chat and cannot be undone.`}
-                                                                                        onDelete={() =>
-                                                                                                deleteChat(
-                                                                                                        currentSession._id,
-                                                                                                )
-                                                                                        }
-                                                                                        trigger={
-                                                                                                <Button
-                                                                                                        size="sm"
-                                                                                                        variant="destructive"
-                                                                                                >
-                                                                                                        <Trash2 className="h-4 w-4 mr-2 hover:text-white" />
-                                                                                                        Delete
-                                                                                                </Button>
-                                                                                        }
-                                                                                />
-                                                                        )}
                                                                 </div>
-                                                        </div>
 
-                                                        {/* Messages Area */}
-                                                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                                                                {currentSession.messages.map((message) => (
-                                                                        <div
-                                                                                key={message.id}
-                                                                                className={`flex ${
-                                                                                        message.role === 'user'
-                                                                                                ? 'justify-end'
-                                                                                                : 'justify-start'
-                                                                                }`}
-                                                                        >
+                                                                {/* Messages Area */}
+                                                                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                                                                        {currentSession.messages.map((message) => (
                                                                                 <div
-                                                                                        className={`flex items-start space-x-2 max-w-[80%] ${
+                                                                                        key={message.id}
+                                                                                        className={`flex ${
                                                                                                 message.role === 'user'
-                                                                                                        ? 'flex-row-reverse space-x-reverse'
-                                                                                                        : ''
+                                                                                                        ? 'justify-end'
+                                                                                                        : 'justify-start'
                                                                                         }`}
                                                                                 >
                                                                                         <div
-                                                                                                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                                                                                className={`flex items-start space-x-2 max-w-[80%] ${
                                                                                                         message.role ===
                                                                                                         'user'
-                                                                                                                ? 'bg-primary text-primary-foreground'
-                                                                                                                : 'bg-muted text-muted-foreground'
+                                                                                                                ? 'flex-row-reverse space-x-reverse'
+                                                                                                                : ''
                                                                                                 }`}
                                                                                         >
-                                                                                                {message.role ===
-                                                                                                'user' ? (
-                                                                                                        session?.user
-                                                                                                                ?.image ? (
-                                                                                                                <Image
-                                                                                                                        width={
-                                                                                                                                32
-                                                                                                                        }
-                                                                                                                        height={
-                                                                                                                                32
-                                                                                                                        }
-                                                                                                                        src={
-                                                                                                                                session
-                                                                                                                                        .user
-                                                                                                                                        .image
-                                                                                                                        }
-                                                                                                                        alt="User avatar"
-                                                                                                                        className="w-8 h-8 rounded-full"
-                                                                                                                />
+                                                                                                <div
+                                                                                                        className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                                                                                                message.role ===
+                                                                                                                'user'
+                                                                                                                        ? 'bg-primary text-primary-foreground'
+                                                                                                                        : 'bg-muted text-muted-foreground'
+                                                                                                        }`}
+                                                                                                >
+                                                                                                        {message.role ===
+                                                                                                        'user' ? (
+                                                                                                                session
+                                                                                                                        ?.user
+                                                                                                                        ?.image ? (
+                                                                                                                        <Image
+                                                                                                                                width={
+                                                                                                                                        32
+                                                                                                                                }
+                                                                                                                                height={
+                                                                                                                                        32
+                                                                                                                                }
+                                                                                                                                src={
+                                                                                                                                        session
+                                                                                                                                                .user
+                                                                                                                                                .image
+                                                                                                                                }
+                                                                                                                                alt="User avatar"
+                                                                                                                                className="w-8 h-8 rounded-full"
+                                                                                                                        />
+                                                                                                                ) : (
+                                                                                                                        <User className="h-4 w-4" />
+                                                                                                                )
                                                                                                         ) : (
-                                                                                                                <User className="h-4 w-4" />
-                                                                                                        )
-                                                                                                ) : (
-                                                                                                        <Bot className="h-4 w-4" />
-                                                                                                )}
-                                                                                        </div>
-                                                                                        <div
-                                                                                                className={`rounded-lg px-4 py-2 ${
-                                                                                                        message.role ===
-                                                                                                        'user'
-                                                                                                                ? 'bg-primary text-primary-foreground'
-                                                                                                                : 'bg-muted text-foreground'
-                                                                                                }`}
-                                                                                        >
-                                                                                                <p className="text-sm whitespace-pre-wrap">
-                                                                                                        {
-                                                                                                                message.content
-                                                                                                        }
-                                                                                                </p>
-                                                                                                <p className="text-xs opacity-70 mt-1">
-                                                                                                        {formatTime(
-                                                                                                                message.timestamp,
+                                                                                                                <Bot className="h-4 w-4" />
                                                                                                         )}
-                                                                                                </p>
-                                                                                        </div>
-                                                                                </div>
-                                                                        </div>
-                                                                ))}
-
-                                                                {isLoading && (
-                                                                        <div className="flex justify-start">
-                                                                                <div className="flex items-start space-x-2">
-                                                                                        <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
-                                                                                                <Bot className="h-4 w-4" />
-                                                                                        </div>
-                                                                                        <div className="bg-muted text-foreground rounded-lg px-4 py-2">
-                                                                                                <div className="flex items-center space-x-2">
-                                                                                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                                                                                        <span className="text-sm">
-                                                                                                                Typing...
-                                                                                                        </span>
+                                                                                                </div>
+                                                                                                <div
+                                                                                                        className={`rounded-lg px-4 py-2 ${
+                                                                                                                message.role ===
+                                                                                                                'user'
+                                                                                                                        ? 'bg-primary text-primary-foreground'
+                                                                                                                        : 'bg-muted text-foreground'
+                                                                                                        }`}
+                                                                                                >
+                                                                                                        <p className="text-sm whitespace-pre-wrap">
+                                                                                                                {
+                                                                                                                        message.content
+                                                                                                                }
+                                                                                                        </p>
+                                                                                                        <p className="text-xs opacity-70 mt-1">
+                                                                                                                {formatTime(
+                                                                                                                        message.timestamp,
+                                                                                                                )}
+                                                                                                        </p>
                                                                                                 </div>
                                                                                         </div>
                                                                                 </div>
-                                                                        </div>
-                                                                )}
-                                                                <div ref={messagesEndRef} />
-                                                        </div>
+                                                                        ))}
 
-                                                        {/* Input Area */}
-                                                        <div className="p-4 border-t bg-background">
-                                                                <div className="flex space-x-2">
-                                                                        <div className="relative flex-1">
-                                                                                <Input
-                                                                                        value={input}
-                                                                                        onChange={(e) =>
-                                                                                                setInput(e.target.value)
+                                                                        {isLoading && (
+                                                                                <div className="flex justify-start">
+                                                                                        <div className="flex items-start space-x-2">
+                                                                                                <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
+                                                                                                        <Bot className="h-4 w-4" />
+                                                                                                </div>
+                                                                                                <div className="bg-muted text-foreground rounded-lg px-4 py-2">
+                                                                                                        <div className="flex items-center space-x-2">
+                                                                                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                                                                                                <span className="text-sm">
+                                                                                                                        Typing...
+                                                                                                                </span>
+                                                                                                        </div>
+                                                                                                </div>
+                                                                                        </div>
+                                                                                </div>
+                                                                        )}
+                                                                        <div ref={messagesEndRef} />
+                                                                </div>
+
+                                                                {/* Input Area */}
+                                                                <div className="p-4 border-t bg-background">
+                                                                        <div className="flex space-x-2">
+                                                                                <div className="relative flex-1">
+                                                                                        <Input
+                                                                                                value={input}
+                                                                                                onChange={(e) =>
+                                                                                                        setInput(
+                                                                                                                e.target
+                                                                                                                        .value,
+                                                                                                        )
+                                                                                                }
+                                                                                                onKeyPress={
+                                                                                                        handleKeyPress
+                                                                                                }
+                                                                                                placeholder="Type your message..."
+                                                                                                disabled={isLoading}
+                                                                                                className="flex-1 border-primary/50 h-12"
+                                                                                        />
+                                                                                </div>
+                                                                                <Button
+                                                                                        onClick={sendMessage}
+                                                                                        disabled={
+                                                                                                !input.trim() ||
+                                                                                                isLoading
                                                                                         }
-                                                                                        onKeyPress={handleKeyPress}
-                                                                                        placeholder="Type your message..."
-                                                                                        disabled={isLoading}
-                                                                                        className="flex-1"
-                                                                                />
+                                                                                        size="icon"
+                                                                                >
+                                                                                        <Send className="h-4 w-4" />
+                                                                                </Button>
                                                                         </div>
-                                                                        <Button
-                                                                                onClick={sendMessage}
-                                                                                disabled={!input.trim() || isLoading}
-                                                                                size="icon"
-                                                                        >
-                                                                                <Send className="h-4 w-4" />
-                                                                        </Button>
+                                                                </div>
+                                                        </>
+                                                ) : (
+                                                        <div className="flex-1 flex items-center justify-center">
+                                                                <div className="text-center">
+                                                                        <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                                                        <h3 className="text-lg font-medium mb-2">
+                                                                                No chat selected
+                                                                        </h3>
+                                                                        <p className="text-muted-foreground">
+                                                                                Select a chat from the sidebar or create
+                                                                                a new one
+                                                                        </p>
                                                                 </div>
                                                         </div>
-                                                </>
-                                        ) : (
-                                                <div className="flex-1 flex items-center justify-center">
-                                                        <div className="text-center">
-                                                                <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                                                                <h3 className="text-lg font-medium mb-2">
-                                                                        No chat selected
-                                                                </h3>
-                                                                <p className="text-muted-foreground">
-                                                                        Select a chat from the sidebar or create a new
-                                                                        one
-                                                                </p>
-                                                        </div>
-                                                </div>
-                                        )}
+                                                )}
+                                        </div>
                                 </div>
-                        </div>
+                        )}
                 </div>
         );
 }
