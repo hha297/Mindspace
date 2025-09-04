@@ -255,7 +255,7 @@ export default function AdminDashboard() {
                         </div>
 
                         {/* Recent Users */}
-                        <Card>
+                        <Card className="mb-8">
                                 <CardHeader>
                                         <CardTitle>Recent Users</CardTitle>
                                         <CardDescription>Latest user registrations</CardDescription>
@@ -297,6 +297,63 @@ export default function AdminDashboard() {
                                                                 </div>
                                                         </div>
                                                 ))}
+                                        </div>
+                                </CardContent>
+                        </Card>
+
+                        {/* Platform Summary */}
+                        <Card>
+                                <CardHeader>
+                                        <CardTitle>Platform Summary</CardTitle>
+                                        <CardDescription>Key insights and statistics</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                                <div className="text-center">
+                                                        <div className="text-2xl font-bold text-primary">
+                                                                {stats?.totalMoodLogs && stats?.totalUsers
+                                                                        ? Math.round(
+                                                                                  stats.totalMoodLogs /
+                                                                                          stats.totalUsers,
+                                                                          )
+                                                                        : 0}
+                                                        </div>
+                                                        <p className="text-sm text-muted-foreground">
+                                                                Avg mood logs per user
+                                                        </p>
+                                                </div>
+                                                <div className="text-center">
+                                                        <div className="text-2xl font-bold text-green-600">
+                                                                {stats?.dailyActiveUsers &&
+                                                                stats.dailyActiveUsers.length > 0
+                                                                        ? Math.round(
+                                                                                  stats.dailyActiveUsers.reduce(
+                                                                                          (sum, day) =>
+                                                                                                  sum + day.activeUsers,
+                                                                                          0,
+                                                                                  ) / stats.dailyActiveUsers.length,
+                                                                          )
+                                                                        : 0}
+                                                        </div>
+                                                        <p className="text-sm text-muted-foreground">
+                                                                Avg daily active users
+                                                        </p>
+                                                </div>
+                                                <div className="text-center">
+                                                        <div className="text-2xl font-bold text-blue-600">
+                                                                {stats?.moodDistribution &&
+                                                                stats.moodDistribution.length > 0
+                                                                        ? Math.round(
+                                                                                  stats.moodDistribution.reduce(
+                                                                                          (sum, mood) =>
+                                                                                                  sum + mood.count,
+                                                                                          0,
+                                                                                  ) / stats.moodDistribution.length,
+                                                                          )
+                                                                        : 0}
+                                                        </div>
+                                                        <p className="text-sm text-muted-foreground">Avg mood score</p>
+                                                </div>
                                         </div>
                                 </CardContent>
                         </Card>

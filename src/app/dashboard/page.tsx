@@ -305,7 +305,7 @@ export default function DashboardPage() {
                                                 <h2 className="text-2xl font-semibold">Self-Help Tools</h2>
                                         </div>
                                         <div className="grid md:grid-cols-4 gap-4">
-                                                <Card className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+                                                <Card className=" hover:shadow-lg transition-all duration-200 hover:scale-105 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
                                                         <CardContent className="p-6 text-center">
                                                                 <Activity className="h-8 w-8 text-green-600 mx-auto mb-3" />
                                                                 <CardTitle className="text-lg mb-2 text-green-800">

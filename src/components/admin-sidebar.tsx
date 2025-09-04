@@ -4,14 +4,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Users, BookOpen, BarChart3, Settings, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, Users, BookOpen, Settings, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 
 const navigation = [
         { name: 'Overview', href: '/admin', icon: LayoutDashboard },
         { name: 'Users', href: '/admin/users', icon: Users },
         { name: 'Resources', href: '/admin/resources', icon: BookOpen },
-        { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
         { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 

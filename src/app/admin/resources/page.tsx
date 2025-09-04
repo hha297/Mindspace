@@ -22,6 +22,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { BookOpen, Video, Activity, PenTool, Clock, Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import { DeleteDialog } from '@/components/delete-dialog';
 
 interface Resource {
         _id: string;
@@ -135,8 +136,6 @@ export default function AdminResourcesPage() {
         };
 
         const handleDelete = async (id: string) => {
-                if (!confirm('Are you sure you want to delete this resource?')) return;
-
                 try {
                         const response = await fetch(`/api/admin/resources/${id}`, {
                                 method: 'DELETE',
@@ -599,17 +598,23 @@ export default function AdminResourcesPage() {
                                                                                                 >
                                                                                                         <Edit className="h-4 w-4" />
                                                                                                 </Button>
-                                                                                                <Button
-                                                                                                        variant="outline"
-                                                                                                        size="sm"
-                                                                                                        onClick={() =>
+                                                                                                <DeleteDialog
+                                                                                                        title="Delete Resource"
+                                                                                                        description={`Are you sure you want to delete "${resource.title}"? This action cannot be undone.`}
+                                                                                                        onDelete={() =>
                                                                                                                 handleDelete(
                                                                                                                         resource._id,
                                                                                                                 )
                                                                                                         }
-                                                                                                >
-                                                                                                        <Trash2 className="h-4 w-4" />
-                                                                                                </Button>
+                                                                                                        trigger={
+                                                                                                                <Button
+                                                                                                                        variant="outline"
+                                                                                                                        size="sm"
+                                                                                                                >
+                                                                                                                        <Trash2 className="h-4 w-4" />
+                                                                                                                </Button>
+                                                                                                        }
+                                                                                                />
                                                                                         </div>
                                                                                 </TableCell>
                                                                         </TableRow>

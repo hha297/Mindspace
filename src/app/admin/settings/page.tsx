@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Navbar } from '@/components/navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -133,7 +132,6 @@ export default function AdminSettingsPage() {
         if (isLoading) {
                 return (
                         <div className="min-h-screen bg-background">
-                                <Navbar />
                                 <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                                         <div className="text-center py-12">
                                                 <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
@@ -146,8 +144,7 @@ export default function AdminSettingsPage() {
 
         return (
                 <div className="min-h-screen bg-background">
-                        <Navbar />
-                        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <main className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
                                 {/* Header */}
                                 <div className="mb-8">
                                         <div className="flex items-center justify-between">
@@ -659,23 +656,23 @@ export default function AdminSettingsPage() {
                                                 </CardHeader>
                                                 <CardContent>
                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                                <div>
+                                                                <div className="space-y-1">
                                                                         <Label>Platform Version</Label>
                                                                         <p className="text-sm font-medium">1.0.0</p>
                                                                 </div>
-                                                                <div>
+                                                                <div className="space-y-1">
                                                                         <Label>Database Status</Label>
                                                                         <Badge variant="default" className="bg-primary">
                                                                                 Connected
                                                                         </Badge>
                                                                 </div>
-                                                                <div>
+                                                                <div className="space-y-1">
                                                                         <Label>Last Backup</Label>
                                                                         <p className="text-sm text-muted-foreground">
                                                                                 {new Date().toLocaleDateString()}
                                                                         </p>
                                                                 </div>
-                                                                <div>
+                                                                <div className="space-y-1">
                                                                         <Label>System Status</Label>
                                                                         <Badge variant="default" className="bg-primary">
                                                                                 Operational

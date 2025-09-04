@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { AlertTriangle, Phone } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -27,9 +28,9 @@ export function EmergencyBanner() {
                                                 size="sm"
                                                 variant="outline"
                                                 className="h-8 flex-1 sm:flex-none border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground bg-transparent"
-                                                onClick={() => {}}
+                                                asChild
                                         >
-                                                Chat Now
+                                                <Link href="/chat">Chat Now</Link>
                                         </Button>
                                 </div>
                         </AlertDescription>

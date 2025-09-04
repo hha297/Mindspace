@@ -30,6 +30,7 @@ import {
         ChevronDown,
         LayoutDashboardIcon,
         Users,
+        BotMessageSquare,
 } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -83,6 +84,7 @@ export function Navbar() {
         const navigation = [
                 { name: 'Home', href: '/', icon: Home },
                 { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
+                { name: 'AI Chat', href: '/chat', icon: BotMessageSquare },
                 { name: 'Tools', href: '/tools', icon: Wrench },
                 { name: 'Resources', href: '/resources', icon: BookOpen },
         ];
@@ -239,19 +241,7 @@ export function Navbar() {
                                                                                                                                 </span>
                                                                                                                         </Link>
                                                                                                                 </DropdownMenuItem>
-                                                                                                                <DropdownMenuItem
-                                                                                                                        asChild
-                                                                                                                >
-                                                                                                                        <Link
-                                                                                                                                href="/admin/analytics"
-                                                                                                                                className="flex items-center space-x-2 cursor-pointer"
-                                                                                                                        >
-                                                                                                                                <BarChart3 className="h-4 w-4 hover:text-white" />
-                                                                                                                                <span>
-                                                                                                                                        Analytics
-                                                                                                                                </span>
-                                                                                                                        </Link>
-                                                                                                                </DropdownMenuItem>
+
                                                                                                                 <DropdownMenuItem
                                                                                                                         asChild
                                                                                                                 >
@@ -374,14 +364,7 @@ export function Navbar() {
                                                                                 <BookOpen className="h-5 w-5" />
                                                                                 <span>Resources</span>
                                                                         </Link>
-                                                                        <Link
-                                                                                href="/admin/analytics"
-                                                                                onClick={() => setIsMenuOpen(false)}
-                                                                                className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-muted-foreground hover:text-white hover:bg-primary rounded-md transition-colors"
-                                                                        >
-                                                                                <BarChart3 className="h-5 w-5" />
-                                                                                <span>Analytics</span>
-                                                                        </Link>
+
                                                                         <Link
                                                                                 href="/admin/settings"
                                                                                 onClick={() => setIsMenuOpen(false)}
