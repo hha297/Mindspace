@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Flame, Sparkles } from 'lucide-react';
 
 interface StreakCelebrationProps {
@@ -39,22 +39,26 @@ const getStreakEmoji = (streak: number) => {
 export function StreakCelebration({ streakCount, onStreakMilestone }: StreakCelebrationProps) {
         const [showCelebration, setShowCelebration] = useState(false);
         const [celebratedStreak, setCelebratedStreak] = useState(0);
-        const [previousStreak, setPreviousStreak] = useState(0);
 
         useEffect(() => {
-                // Check if we hit a new milestone
+                // Get previously celebrated milestones from localStorage
+                const celebratedMilestones = JSON.parse(localStorage.getItem('celebratedMilestones') || '[]');
+
+                // Check if we hit a new milestone that hasn't been celebrated yet
                 const newMilestone = streakMilestones.find(
-                        (milestone) => streakCount >= milestone && previousStreak < milestone,
+                        (milestone) => streakCount >= milestone && !celebratedMilestones.includes(milestone),
                 );
 
-                if (newMilestone && streakCount > previousStreak) {
+                if (newMilestone) {
+                        // Mark this milestone as celebrated
+                        const updatedMilestones = [...celebratedMilestones, newMilestone];
+                        localStorage.setItem('celebratedMilestones', JSON.stringify(updatedMilestones));
+
                         setCelebratedStreak(streakCount);
                         setShowCelebration(true);
                         onStreakMilestone?.(newMilestone);
                 }
-
-                setPreviousStreak(streakCount);
-        }, [streakCount, previousStreak, onStreakMilestone]);
+        }, [streakCount, onStreakMilestone]);
 
         const nextMilestone = streakMilestones.find((milestone) => milestone > streakCount);
         const progressToNext = nextMilestone ? (streakCount / nextMilestone) * 100 : 100;
@@ -128,11 +132,11 @@ export function StreakCelebration({ streakCount, onStreakMilestone }: StreakCele
                                                         <Flame className="h-10 w-10 text-white" />
                                                 </div>
                                                 <DialogTitle className="text-3xl">Streak Milestone!</DialogTitle>
-                                                <DialogDescription className="text-lg space-y-2">
-                                                        <div className="text-2xl font-bold text-orange-600">
+                                                <div className="text-muted-foreground text-sm">
+                                                        <div className="text-2xl font-bold text-orange-600 mb-2">
                                                                 {celebratedStreak} Days Strong!
                                                         </div>
-                                                        <div>{getStreakMessage(celebratedStreak)}</div>
+                                                        <div className="mb-2">{getStreakMessage(celebratedStreak)}</div>
                                                         <div className="flex items-center justify-center space-x-2 text-orange-500 mt-4">
                                                                 <Sparkles className="h-5 w-5" />
                                                                 <span>
@@ -141,7 +145,7 @@ export function StreakCelebration({ streakCount, onStreakMilestone }: StreakCele
                                                                 </span>
                                                                 <Sparkles className="h-5 w-5" />
                                                         </div>
-                                                </DialogDescription>
+                                                </div>
                                         </DialogHeader>
                                         <div className="pt-4">
                                                 <Button

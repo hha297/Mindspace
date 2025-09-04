@@ -71,6 +71,17 @@ export async function POST(request: NextRequest) {
                         return NextResponse.json({ error: 'User not found' }, { status: 404 });
                 }
 
+                const now = new Date();
+                const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+                const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+                const todayLog = await MoodLog.findOne({
+                        userId: user._id,
+                        createdAt: { $gte: todayStart, $lte: todayEnd },
+                });
+
+                const isFirstLogToday = !todayLog;
+
                 // Create mood log
                 const moodLog = await MoodLog.create({
                         userId: user._id,
@@ -80,40 +91,35 @@ export async function POST(request: NextRequest) {
                         tags: tags || [],
                 });
 
-                // Update user's last mood log and streak
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-
-                const yesterday = new Date(today);
-                yesterday.setDate(yesterday.getDate() - 1);
-
-                const todayLog = await MoodLog.findOne({
-                        userId: user._id,
-                        createdAt: { $gte: today },
-                });
-
-                const yesterdayLog = await MoodLog.findOne({
-                        userId: user._id,
-                        createdAt: { $gte: yesterday, $lt: today },
-                });
-
                 let newStreakCount = user.streakCount || 0;
 
-                if (todayLog && yesterdayLog) {
-                        // Continue streak
-                        newStreakCount = user.streakCount + 1;
-                } else if (todayLog && !yesterdayLog && user.streakCount === 0) {
-                        // Start new streak
-                        newStreakCount = 1;
-                } else if (!yesterdayLog && user.streakCount > 0) {
-                        // Reset streak
-                        newStreakCount = 1;
-                }
+                if (isFirstLogToday) {
+                        const yesterdayStart = new Date(todayStart);
+                        yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+                        const yesterdayEnd = new Date(todayEnd);
+                        yesterdayEnd.setDate(yesterdayEnd.getDate() - 1);
 
-                await User.findByIdAndUpdate(user._id, {
-                        lastMoodLog: new Date(),
-                        streakCount: newStreakCount,
-                });
+                        const yesterdayLog = await MoodLog.findOne({
+                                userId: user._id,
+                                createdAt: { $gte: yesterdayStart, $lte: yesterdayEnd },
+                        });
+
+                        if (yesterdayLog) {
+                                // Continue streak
+                                newStreakCount = user.streakCount + 1;
+                        } else if (user.streakCount === 0) {
+                                // Start new streak
+                                newStreakCount = 1;
+                        } else {
+                                // Reset streak (missed yesterday)
+                                newStreakCount = 1;
+                        }
+
+                        await User.findByIdAndUpdate(user._id, {
+                                lastMoodLog: new Date(),
+                                streakCount: newStreakCount,
+                        });
+                }
 
                 return NextResponse.json({
                         moodLog,

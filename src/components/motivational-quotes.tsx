@@ -22,6 +22,46 @@ const motivationalQuotes = [
                 category: 'strength',
         },
         {
+                text: 'Bad days happen then good days happen. Just keep going.',
+                author: 'Anonymous',
+                category: 'progress',
+        },
+        {
+                text: 'Bad things at times do happen to good people.',
+                author: 'Anonymous',
+                category: 'life',
+        },
+        {
+                text: 'There’s no one who’s happy all the time. It’s just that some people are better at pretending.',
+                author: 'Emma W.',
+                category: 'life',
+        },
+        {
+                text: 'Life doesn’t always turn out the way you planned. But that’s okay.',
+                author: 'Anonymous',
+                category: 'life',
+        },
+        {
+                text: 'It’s not the end just because you failed once.',
+                author: 'Michael L.',
+                category: 'failure',
+        },
+        {
+                text: 'You never know what life will throw at you. That’s why we have each other.',
+                author: 'Anonymous',
+                category: 'friendship',
+        },
+        {
+                text: 'Even if it’s a small thing, if it makes you happy, it’s worth it.',
+                author: 'Sophie K.',
+                category: 'happiness',
+        },
+        {
+                text: 'Don’t compare your life to others. Everyone has their own pace.',
+                author: 'Anonymous',
+                category: 'life',
+        },
+        {
                 text: 'Progress, not perfection. Every small step counts.',
                 author: 'Anonymous',
                 category: 'progress',
@@ -116,10 +156,35 @@ export function MotivationalQuotes() {
                 }
         };
 
+        const getCategoryBgColor = (category: string) => {
+                switch (category) {
+                        case 'self-care':
+                                return 'bg-pink-50 border-pink-200';
+                        case 'hope':
+                                return 'bg-blue-50 border-blue-200';
+                        case 'strength':
+                                return 'bg-purple-50 border-purple-200';
+                        case 'progress':
+                                return 'bg-green-50 border-green-200';
+                        case 'happiness':
+                                return 'bg-yellow-50 border-yellow-200';
+                        case 'healing':
+                                return 'bg-emerald-50 border-emerald-200';
+                        case 'acceptance':
+                                return 'bg-indigo-50 border-indigo-200';
+                        case 'identity':
+                                return 'bg-orange-50 border-orange-200';
+                        case 'journey':
+                                return 'bg-teal-50 border-teal-200';
+                        default:
+                                return 'bg-gray-50 border-gray-200';
+                }
+        };
+
         const IconComponent = getCategoryIcon(currentQuote.category);
 
         return (
-                <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+                <Card className={`${getCategoryBgColor(currentQuote.category)}`}>
                         <CardContent className="p-6">
                                 <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center space-x-2">

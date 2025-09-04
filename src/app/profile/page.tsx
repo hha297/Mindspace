@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import { Navbar } from '@/components/navbar';
@@ -184,10 +184,6 @@ export default function ProfilePage() {
                 }
         };
 
-        const handleSignOut = () => {
-                signOut({ callbackUrl: '/' });
-        };
-
         if (status === 'loading' || isLoading) {
                 return (
                         <div className="min-h-screen bg-background">
@@ -236,17 +232,34 @@ export default function ProfilePage() {
                                 {/* Profile Form */}
                                 <ProfileForm profile={profile} setProfile={setProfile} />
 
-                                {/* Password Change */}
-                                <div className="mt-8">
-                                        <PasswordChange
-                                                passwordData={passwordData}
-                                                setPasswordData={setPasswordData}
-                                                showPasswords={showPasswords}
-                                                setShowPasswords={setShowPasswords}
-                                                onPasswordChange={handlePasswordChange}
-                                                isChangingPassword={isChangingPassword}
-                                        />
-                                </div>
+                                {/* Password Change - Only show for email provider */}
+                                {profile?.provider === 'email' ? (
+                                        <div className="mt-8">
+                                                <PasswordChange
+                                                        passwordData={passwordData}
+                                                        setPasswordData={setPasswordData}
+                                                        showPasswords={showPasswords}
+                                                        setShowPasswords={setShowPasswords}
+                                                        onPasswordChange={handlePasswordChange}
+                                                        isChangingPassword={isChangingPassword}
+                                                />
+                                        </div>
+                                ) : (
+                                        <div className="mt-8 p-4 bg-muted/50 rounded-lg border border-dashed">
+                                                <div className="text-center">
+                                                        <p className="text-sm text-muted-foreground">
+                                                                Password management is handled by your{' '}
+                                                                {profile?.provider === 'google' ? 'Google' : 'GitHub'}{' '}
+                                                                account.
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground mt-1">
+                                                                To change your password, please visit your{' '}
+                                                                {profile?.provider === 'google' ? 'Google' : 'GitHub'}{' '}
+                                                                account settings.
+                                                        </p>
+                                                </div>
+                                        </div>
+                                )}
 
                                 {/* Action Buttons */}
                                 <div className="flex items-center justify-between mt-8 pt-8 border-t">
@@ -263,9 +276,6 @@ export default function ProfilePage() {
                                                         </Button>
                                                 )}
                                         </div>
-                                        <Button variant="destructive" onClick={handleSignOut}>
-                                                Sign Out
-                                        </Button>
                                 </div>
                         </main>
                 </div>

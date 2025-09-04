@@ -149,15 +149,16 @@ function HomePageContent() {
                                                                         </CardHeader>
                                                                         <CardContent>
                                                                                 <p className="text-sm text-muted-foreground mb-4">
-                                                                                        Connect with trained counselors
-                                                                                        who understand student life.
+                                                                                        Connect with trained AI
+                                                                                        counselors to talk about your
+                                                                                        problems.
                                                                                 </p>
                                                                                 <Button
                                                                                         variant="outline"
                                                                                         size="sm"
                                                                                         asChild
                                                                                 >
-                                                                                        <Link href="/resources">
+                                                                                        <Link href="/chat">
                                                                                                 Find Support
                                                                                         </Link>
                                                                                 </Button>

@@ -21,7 +21,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
-import { BookOpen, Video, Activity, PenTool, Clock, Plus, Edit, Trash2, Eye, EyeOff, Calendar } from 'lucide-react';
+import {
+        BookOpen,
+        Video,
+        Activity,
+        PenTool,
+        Clock,
+        Plus,
+        Edit,
+        Trash2,
+        Calendar,
+        StarIcon,
+        StarOffIcon,
+} from 'lucide-react';
 import { DeleteDialog } from '@/components/delete-dialog';
 
 interface Resource {
@@ -564,9 +576,9 @@ export default function AdminResourcesPage() {
                                                                         </div>
                                                                         <div className="flex items-center space-x-1">
                                                                                 {resource.featured ? (
-                                                                                        <Eye className="h-3 w-3 text-green-600" />
+                                                                                        <StarIcon className="h-3 w-3 text-green-600" />
                                                                                 ) : (
-                                                                                        <EyeOff className="h-3 w-3 text-muted-foreground" />
+                                                                                        <StarOffIcon className="h-3 w-3 text-muted-foreground" />
                                                                                 )}
                                                                                 <span className="text-muted-foreground">
                                                                                         {resource.featured
@@ -591,9 +603,9 @@ export default function AdminResourcesPage() {
                                                                                 className="flex-1"
                                                                         >
                                                                                 {resource.featured ? (
-                                                                                        <EyeOff className="h-3 w-3 mr-1" />
+                                                                                        <StarIcon className="h-3 w-3 mr-1" />
                                                                                 ) : (
-                                                                                        <Eye className="h-3 w-3 mr-1" />
+                                                                                        <StarOffIcon className="h-3 w-3 mr-1" />
                                                                                 )}
                                                                                 {resource.featured
                                                                                         ? 'Unfeature'
@@ -695,9 +707,9 @@ export default function AdminResourcesPage() {
                                                                                         <TableCell>
                                                                                                 <div className="flex items-center space-x-2">
                                                                                                         {resource.featured ? (
-                                                                                                                <Eye className="h-4 w-4 text-green-600" />
+                                                                                                                <StarIcon className="h-4 w-4 text-green-600" />
                                                                                                         ) : (
-                                                                                                                <EyeOff className="h-4 w-4 text-gray-400" />
+                                                                                                                <StarOffIcon className="h-4 w-4 text-gray-400" />
                                                                                                         )}
                                                                                                         <Badge
                                                                                                                 variant={
@@ -734,9 +746,9 @@ export default function AdminResourcesPage() {
                                                                                                                 }
                                                                                                         >
                                                                                                                 {resource.featured ? (
-                                                                                                                        <EyeOff className="h-4 w-4" />
+                                                                                                                        <StarOffIcon className="h-4 w-4" />
                                                                                                                 ) : (
-                                                                                                                        <Eye className="h-4 w-4" />
+                                                                                                                        <StarIcon className="h-4 w-4" />
                                                                                                                 )}
                                                                                                         </Button>
                                                                                                         <Button

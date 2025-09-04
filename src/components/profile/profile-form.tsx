@@ -51,11 +51,17 @@ export function ProfileForm({ profile, setProfile }: ProfileFormProps) {
                                                         value={profile.name}
                                                         onChange={(e) => updateProfile('name', e.target.value)}
                                                         placeholder="Enter your full name"
+                                                        className="bg-white border-primary/50"
                                                 />
                                         </div>
                                         <div className="space-y-2">
                                                 <Label htmlFor="email">Email Address</Label>
-                                                <Input id="email" value={profile.email} disabled className="bg-muted" />
+                                                <Input
+                                                        id="email"
+                                                        value={profile.email}
+                                                        disabled
+                                                        className="bg-white border-primary/50"
+                                                />
                                                 <p className="text-xs text-muted-foreground">
                                                         Email cannot be changed for {profile.provider} accounts
                                                 </p>
@@ -69,6 +75,7 @@ export function ProfileForm({ profile, setProfile }: ProfileFormProps) {
                                                                 updateProfile('emergencyContact', e.target.value)
                                                         }
                                                         placeholder="Phone number or email"
+                                                        className="bg-white border-primary/50"
                                                 />
                                         </div>
                                 </CardContent>
@@ -92,6 +99,7 @@ export function ProfileForm({ profile, setProfile }: ProfileFormProps) {
                                                         onChange={(e) => updateProfile('personalGoals', e.target.value)}
                                                         placeholder="What are your mental health goals?"
                                                         rows={3}
+                                                        className="bg-white border-primary/50"
                                                 />
                                         </div>
                                         <div className="space-y-2">
@@ -100,7 +108,7 @@ export function ProfileForm({ profile, setProfile }: ProfileFormProps) {
                                                         value={profile.privacyLevel}
                                                         onValueChange={(value) => updateProfile('privacyLevel', value)}
                                                 >
-                                                        <SelectTrigger>
+                                                        <SelectTrigger className="bg-white border-primary/50">
                                                                 <SelectValue />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -121,6 +129,7 @@ export function ProfileForm({ profile, setProfile }: ProfileFormProps) {
                                                         onCheckedChange={(checked) =>
                                                                 updateProfile('notificationsEnabled', checked)
                                                         }
+                                                        className="border-primary/50 data-[state=unchecked]:bg-white data-[state=unchecked]:border-primary/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary [&>span]:data-[state=unchecked]:bg-primary [&>span]:data-[state=checked]:bg-white"
                                                 />
                                         </div>
                                 </CardContent>
