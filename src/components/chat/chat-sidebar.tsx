@@ -76,16 +76,23 @@ export function ChatSidebar({
                                         filteredChatSessions.map((chatSession) => (
                                                 <div
                                                         key={chatSession._id}
-                                                        className={`p-4 border-b cursor-pointer hover:bg-muted/50 transition-colors group ${
+                                                        className={`p-4 border-b cursor-pointer hover:bg-primary/20 transition-colors group ${
                                                                 currentSession?._id === chatSession._id
-                                                                        ? 'bg-muted'
+                                                                        ? 'bg-primary/10 border-primary/20 border-l-4 border-l-primary/40'
                                                                         : ''
                                                         }`}
                                                         onClick={() => onSelectChat(chatSession)}
                                                 >
                                                         <div className="flex-1 min-w-0">
                                                                 <div className="flex items-center justify-between">
-                                                                        <h3 className="font-medium text-sm truncate">
+                                                                        <h3
+                                                                                className={`font-medium text-sm truncate ${
+                                                                                        currentSession?._id ===
+                                                                                        chatSession._id
+                                                                                                ? 'text-primary/80 font-semibold'
+                                                                                                : ''
+                                                                                }`}
+                                                                        >
                                                                                 {chatSession.title}
                                                                         </h3>
                                                                         <DropdownMenu>

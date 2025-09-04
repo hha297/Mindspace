@@ -147,8 +147,10 @@ export default function DashboardPage() {
                                         onMoodLogged={handleMoodLogged}
                                 />
 
-                                {/* Self-Help Tools */}
-                                <SelfHelpTools />
+                                {/* Self-Help Tools only on mobile */}
+                                <div className="lg:hidden">
+                                        <SelfHelpTools />
+                                </div>
                         </main>
                 </div>
         );

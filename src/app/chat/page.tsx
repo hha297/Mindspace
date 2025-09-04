@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { Loader2, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
@@ -53,9 +53,10 @@ interface ApiChatSessionDetail {
         updatedAt: string;
 }
 
-export default function ChatPage() {
+function ChatPageContent() {
         const { data: session, status } = useSession();
         const router = useRouter();
+        const searchParams = useSearchParams();
         const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
         const [currentSession, setCurrentSession] = useState<ChatSession | null>(null);
         const [input, setInput] = useState('');
@@ -85,66 +86,6 @@ export default function ChatPage() {
 
                 return () => window.removeEventListener('resize', checkMobile);
         }, []);
-
-        // Load chat sessions from database
-        useEffect(() => {
-                const loadChatSessions = async () => {
-                        try {
-                                const response = await fetch('/api/chat/sessions');
-                                if (response.ok) {
-                                        const data = await response.json();
-                                        const sessions = data.sessions.map((session: ApiChatSession) => ({
-                                                _id: session._id,
-                                                title: session.title,
-                                                lastMessage: session.lastMessage,
-                                                timestamp: new Date(session.updatedAt),
-                                                messages: [], // We'll load messages when selecting a session
-                                        }));
-                                        setChatSessions(sessions);
-
-                                        // If no sessions exist, create a default one
-                                        if (sessions.length === 0) {
-                                                await createNewChat();
-                                        } else {
-                                                // Load the first session
-                                                await loadChatSession(sessions[0]._id);
-                                        }
-                                }
-                        } catch (error) {
-                                console.error('Error loading chat sessions:', error);
-                                toast.error('Failed to load chat sessions');
-                        } finally {
-                                setIsLoadingSessions(false);
-                        }
-                };
-
-                if (session?.user?.email) {
-                        loadChatSessions();
-                }
-        }, [session]);
-
-        const loadChatSession = async (sessionId: string) => {
-                try {
-                        const response = await fetch(`/api/chat/sessions/${sessionId}`);
-                        if (response.ok) {
-                                const data = await response.json();
-                                const session = data.session as ApiChatSessionDetail;
-                                setCurrentSession({
-                                        _id: session._id,
-                                        title: session.title,
-                                        lastMessage: session.lastMessage,
-                                        timestamp: new Date(session.updatedAt),
-                                        messages: session.messages.map((msg: ApiMessage) => ({
-                                                ...msg,
-                                                timestamp: new Date(msg.timestamp),
-                                        })),
-                                });
-                        }
-                } catch (error) {
-                        console.error('Error loading chat session:', error);
-                        toast.error('Failed to load chat session');
-                }
-        };
 
         const createNewChat = async () => {
                 const newSession: ChatSession = {
@@ -184,6 +125,12 @@ export default function ChatPage() {
                                 };
                                 setChatSessions((prev) => [savedSession, ...prev]);
                                 setCurrentSession(savedSession);
+
+                                // Update URL immediately with new chat info
+                                const params = new URLSearchParams(searchParams);
+                                params.set('chatId', savedSession._id);
+                                params.set('chatName', savedSession.title);
+                                router.replace(`/chat?${params.toString()}`, { scroll: false });
                         }
                 } catch (error) {
                         console.error('Error creating new chat:', error);
@@ -191,8 +138,106 @@ export default function ChatPage() {
                 }
         };
 
+        // Load chat sessions from database
+        useEffect(() => {
+                const loadChatSessions = async () => {
+                        try {
+                                const response = await fetch('/api/chat/sessions');
+                                if (response.ok) {
+                                        const data = await response.json();
+                                        const sessions = data.sessions.map((session: ApiChatSession) => ({
+                                                _id: session._id,
+                                                title: session.title,
+                                                lastMessage: session.lastMessage,
+                                                timestamp: new Date(session.updatedAt),
+                                                messages: [], // We'll load messages when selecting a session
+                                        }));
+                                        setChatSessions(sessions);
+
+                                        // If no sessions exist, create a default one
+                                        if (sessions.length === 0) {
+                                                await createNewChat();
+                                        } else {
+                                                // Check URL params for specific chat
+                                                const chatIdParam = searchParams.get('chatId');
+
+                                                if (chatIdParam) {
+                                                        const targetSession = sessions.find(
+                                                                (s: ChatSession) => s._id === chatIdParam,
+                                                        );
+                                                        if (targetSession) {
+                                                                await loadChatSession(targetSession._id);
+                                                                // Update URL with both id and name
+                                                                const params = new URLSearchParams(searchParams);
+                                                                params.set('chatId', targetSession._id);
+                                                                params.set('chatName', targetSession.title);
+                                                                router.replace(`/chat?${params.toString()}`, {
+                                                                        scroll: false,
+                                                                });
+                                                        } else {
+                                                                // Load the first session if chatId not found
+                                                                await loadChatSession(sessions[0]._id);
+                                                                const params = new URLSearchParams(searchParams);
+                                                                params.set('chatId', sessions[0]._id);
+                                                                params.set('chatName', sessions[0].title);
+                                                                router.replace(`/chat?${params.toString()}`, {
+                                                                        scroll: false,
+                                                                });
+                                                        }
+                                                } else {
+                                                        // Load the first session and update URL
+                                                        await loadChatSession(sessions[0]._id);
+                                                        const params = new URLSearchParams(searchParams);
+                                                        params.set('chatId', sessions[0]._id);
+                                                        params.set('chatName', sessions[0].title);
+                                                        router.replace(`/chat?${params.toString()}`, { scroll: false });
+                                                }
+                                        }
+                                }
+                        } catch (error) {
+                                console.error('Error loading chat sessions:', error);
+                                toast.error('Failed to load chat sessions');
+                        } finally {
+                                setIsLoadingSessions(false);
+                        }
+                };
+
+                if (session?.user?.email) {
+                        loadChatSessions();
+                }
+        }, [router, searchParams, session]);
+
+        const loadChatSession = async (sessionId: string) => {
+                try {
+                        const response = await fetch(`/api/chat/sessions/${sessionId}`);
+                        if (response.ok) {
+                                const data = await response.json();
+                                const session = data.session as ApiChatSessionDetail;
+                                setCurrentSession({
+                                        _id: session._id,
+                                        title: session.title,
+                                        lastMessage: session.lastMessage,
+                                        timestamp: new Date(session.updatedAt),
+                                        messages: session.messages.map((msg: ApiMessage) => ({
+                                                ...msg,
+                                                timestamp: new Date(msg.timestamp),
+                                        })),
+                                });
+                        }
+                } catch (error) {
+                        console.error('Error loading chat session:', error);
+                        toast.error('Failed to load chat session');
+                }
+        };
+
         const selectChat = async (session: ChatSession) => {
                 await loadChatSession(session._id);
+                // Update URL with chat info
+                const params = new URLSearchParams(searchParams);
+                params.set('chatId', session._id);
+                params.set('chatName', session.title);
+                router.push(`/chat?${params.toString()}`, { scroll: false });
+
                 if (isMobileView) {
                         setShowChatList(false);
                 }
@@ -212,8 +257,18 @@ export default function ChatPage() {
                                         );
                                         if (remainingSessions.length > 0) {
                                                 await loadChatSession(remainingSessions[0]._id);
+                                                // Update URL with remaining chat info
+                                                const params = new URLSearchParams(searchParams);
+                                                params.set('chatId', remainingSessions[0]._id);
+                                                params.set('chatName', remainingSessions[0].title);
+                                                router.replace(`/chat?${params.toString()}`, { scroll: false });
                                         } else {
                                                 setCurrentSession(null);
+                                                // Clear URL params if no chats left
+                                                const params = new URLSearchParams(searchParams);
+                                                params.delete('chatId');
+                                                params.delete('chatName');
+                                                router.replace(`/chat?${params.toString()}`, { scroll: false });
                                         }
                                 }
                                 toast.success('Chat deleted successfully');
@@ -465,6 +520,7 @@ export default function ChatPage() {
                                         {showChatList ? (
                                                 <MobileChatList
                                                         chatSessions={chatSessions}
+                                                        currentSession={currentSession}
                                                         searchQuery={searchQuery}
                                                         setSearchQuery={setSearchQuery}
                                                         onCreateNewChat={createNewChat}
@@ -569,5 +625,25 @@ export default function ChatPage() {
                                 </div>
                         )}
                 </div>
+        );
+}
+
+export default function ChatPage() {
+        return (
+                <Suspense
+                        fallback={
+                                <div className="min-h-screen bg-background">
+                                        <Navbar />
+                                        <div className="flex h-[calc(100vh-64px)] items-center justify-center">
+                                                <div className="text-center">
+                                                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+                                                        <p className="text-muted-foreground">Loading chat...</p>
+                                                </div>
+                                        </div>
+                                </div>
+                        }
+                >
+                        <ChatPageContent />
+                </Suspense>
         );
 }

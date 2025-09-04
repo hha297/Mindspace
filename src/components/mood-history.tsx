@@ -6,7 +6,25 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Label } from '@/components/ui/label';
-import { Calendar, TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+        Calendar,
+        TrendingUp,
+        TrendingDown,
+        Minus,
+        ChevronDown,
+        ChevronUp,
+        MoreHorizontal,
+        Edit,
+        Trash2,
+} from 'lucide-react';
+import {
+        DropdownMenu,
+        DropdownMenuContent,
+        DropdownMenuItem,
+        DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { DeleteDialog } from '@/components/delete-dialog';
+import { MoodEditModal } from '@/components/mood-edit-modal';
 import { format, isToday, isYesterday } from 'date-fns';
 
 interface MoodLog {
@@ -49,6 +67,8 @@ export function MoodHistory() {
         const [sortBy, setSortBy] = useState<'date' | 'mood'>('date');
         const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
         const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
+        const [editingLog, setEditingLog] = useState<MoodLog | null>(null);
+        const [isEditModalOpen, setIsEditModalOpen] = useState(false);
         const itemsPerPage = 5;
 
         useEffect(() => {
@@ -101,6 +121,33 @@ export function MoodHistory() {
                         }
                         return newSet;
                 });
+        };
+
+        const handleEdit = (log: MoodLog) => {
+                setEditingLog(log);
+                setIsEditModalOpen(true);
+        };
+
+        const handleDeleteMood = async (logId: string) => {
+                try {
+                        const response = await fetch(`/api/mood/${logId}`, {
+                                method: 'DELETE',
+                        });
+
+                        if (response.ok) {
+                                setMoodLogs((prev) => prev.filter((log) => log._id !== logId));
+                                // Dispatch event to update other components
+                                window.dispatchEvent(new CustomEvent('mood-logged'));
+                        }
+                } catch (error) {
+                        console.error('Failed to delete mood log:', error);
+                }
+        };
+
+        const handleSaveEdit = (updatedLog: MoodLog) => {
+                setMoodLogs((prev) => prev.map((log) => (log._id === updatedLog._id ? updatedLog : log)));
+                // Dispatch event to update other components
+                window.dispatchEvent(new CustomEvent('mood-logged'));
         };
 
         const getAverageMood = () => {
@@ -188,190 +235,270 @@ export function MoodHistory() {
         const trend = getTrend();
         console.log(trend);
         return (
-                <Card>
-                        <CardHeader>
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                        <div>
-                                                <CardTitle>Mood History</CardTitle>
-                                                <CardDescription>Your recent mood entries and trends</CardDescription>
-                                        </div>
-                                        <div className="text-center sm:text-right">
-                                                <div className="text-sm text-muted-foreground">Average Mood</div>
-                                                <div className="flex items-center justify-center sm:justify-end space-x-2">
-                                                        <span className="text-2xl font-bold">
-                                                                {averageMood.toFixed(1)}
-                                                        </span>
-                                                        {trend === 'up' && (
-                                                                <TrendingUp className="h-4 w-4 text-green-600" />
-                                                        )}
-                                                        {trend === 'down' && (
-                                                                <TrendingDown className="h-4 w-4 text-red-600" />
-                                                        )}
-                                                        {trend === 'neutral' && (
-                                                                <Minus className="h-4 w-4 text-gray-600" />
-                                                        )}
-                                                </div>
-                                        </div>
-                                </div>
-
-                                {/* Sorting Controls */}
-                                <div className="flex flex-col gap-4 mt-4">
+                <>
+                        <Card>
+                                <CardHeader>
                                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                                <div className="flex flex-col sm:flex-row items-start sm:items-center  gap-2">
-                                                        <Label className="text-sm">Sort by:</Label>
-                                                        <div className="flex gap-2">
-                                                                <select
-                                                                        value={sortBy}
-                                                                        onChange={(e) => {
-                                                                                setSortBy(
-                                                                                        e.target.value as
-                                                                                                | 'date'
-                                                                                                | 'mood',
-                                                                                );
-                                                                                setCurrentPage(1);
-                                                                        }}
-                                                                        className="text-sm border rounded px-2 py-1 bg-white"
-                                                                >
-                                                                        <option value="date">Date</option>
-                                                                        <option value="mood">Mood Score</option>
-                                                                </select>
-                                                                <select
-                                                                        value={sortOrder}
-                                                                        onChange={(e) => {
-                                                                                setSortOrder(
-                                                                                        e.target.value as
-                                                                                                | 'asc'
-                                                                                                | 'desc',
-                                                                                );
-                                                                                setCurrentPage(1);
-                                                                        }}
-                                                                        className="text-sm border rounded px-2 py-1 bg-white"
-                                                                >
-                                                                        <option value="desc">Descending</option>
-                                                                        <option value="asc">Ascending</option>
-                                                                </select>
-                                                        </div>
+                                                <div>
+                                                        <CardTitle>Mood History</CardTitle>
+                                                        <CardDescription>
+                                                                Your recent mood entries and trends
+                                                        </CardDescription>
                                                 </div>
-                                                <div className="text-sm text-muted-foreground text-center sm:text-right">
-                                                        Page {currentPage} of {totalPages} ({sortedLogs.length} total
-                                                        entries)
+                                                <div className="text-center sm:text-right">
+                                                        <div className="text-sm text-muted-foreground">
+                                                                Average Mood
+                                                        </div>
+                                                        <div className="flex items-center justify-center sm:justify-end space-x-2">
+                                                                <span className="text-2xl font-bold">
+                                                                        {averageMood.toFixed(1)}
+                                                                </span>
+                                                                {trend === 'up' && (
+                                                                        <TrendingUp className="h-4 w-4 text-green-600" />
+                                                                )}
+                                                                {trend === 'down' && (
+                                                                        <TrendingDown className="h-4 w-4 text-red-600" />
+                                                                )}
+                                                                {trend === 'neutral' && (
+                                                                        <Minus className="h-4 w-4 text-gray-600" />
+                                                                )}
+                                                        </div>
                                                 </div>
                                         </div>
-                                </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                                {displayedLogs.map((log) => {
-                                        const isExpanded = expandedLogs.has(log._id);
-                                        const hasLongContent =
-                                                (log.note && log.note.length > 200) || log.tags.length > 5;
 
-                                        return (
-                                                <div
-                                                        key={log._id}
-                                                        className="flex items-start space-x-4 p-4 rounded-lg border border-primary/50 bg-white"
-                                                >
-                                                        <div className="text-3xl flex-shrink-0">
-                                                                {moodEmojis[log.mood]}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-                                                                        <Badge className={moodColors[log.mood]}>
-                                                                                {moodLabels[log.mood]}
-                                                                        </Badge>
-                                                                        <span className="text-sm text-muted-foreground">
-                                                                                {formatDate(log.createdAt)} at{' '}
-                                                                                {formatTime(log.createdAt)}
-                                                                        </span>
+                                        {/* Sorting Controls */}
+                                        <div className="flex flex-col gap-4 mt-4">
+                                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                                        <div className="flex flex-col sm:flex-row items-start sm:items-center  gap-2">
+                                                                <Label className="text-sm">Sort by:</Label>
+                                                                <div className="flex gap-2">
+                                                                        <select
+                                                                                value={sortBy}
+                                                                                onChange={(e) => {
+                                                                                        setSortBy(
+                                                                                                e.target.value as
+                                                                                                        | 'date'
+                                                                                                        | 'mood',
+                                                                                        );
+                                                                                        setCurrentPage(1);
+                                                                                }}
+                                                                                className="text-sm border rounded px-2 py-1 bg-white "
+                                                                        >
+                                                                                <option value="date">Date</option>
+                                                                                <option value="mood">Mood Score</option>
+                                                                        </select>
+                                                                        <select
+                                                                                value={sortOrder}
+                                                                                onChange={(e) => {
+                                                                                        setSortOrder(
+                                                                                                e.target.value as
+                                                                                                        | 'asc'
+                                                                                                        | 'desc',
+                                                                                        );
+                                                                                        setCurrentPage(1);
+                                                                                }}
+                                                                                className="text-sm border rounded px-2 py-1 bg-white"
+                                                                        >
+                                                                                <option value="desc">Descending</option>
+                                                                                <option value="asc">Ascending</option>
+                                                                        </select>
                                                                 </div>
-                                                                {log.note && (
-                                                                        <p
-                                                                                className={`text-sm text-muted-foreground mb-2 ${
-                                                                                        !isExpanded && hasLongContent
-                                                                                                ? 'line-clamp-2'
-                                                                                                : ''
-                                                                                }`}
-                                                                        >
-                                                                                {log.note}
-                                                                        </p>
-                                                                )}
-                                                                {hasLongContent && (
-                                                                        <Button
-                                                                                variant="outline"
-                                                                                size="sm"
-                                                                                onClick={() => toggleExpanded(log._id)}
-                                                                                className="mb-2 p-1 h-auto text-xs text-primary hover:text-white"
-                                                                        >
-                                                                                {isExpanded ? (
-                                                                                        <>
-                                                                                                <ChevronUp className="h-3 w-3 mr-1" />
-                                                                                                See less
-                                                                                        </>
-                                                                                ) : (
-                                                                                        <>
-                                                                                                <ChevronDown className="h-3 w-3 mr-1" />
-                                                                                                See more
-                                                                                        </>
-                                                                                )}
-                                                                        </Button>
-                                                                )}
-                                                                {log.tags.length > 0 && (
-                                                                        <div
-                                                                                className={`flex flex-wrap gap-1 ${
-                                                                                        !isExpanded &&
-                                                                                        log.tags.length > 5
-                                                                                                ? 'max-h-6 overflow-hidden'
-                                                                                                : ''
-                                                                                }`}
-                                                                        >
-                                                                                {log.tags.map((tag) => (
-                                                                                        <Badge
-                                                                                                key={tag}
-                                                                                                variant="outline"
-                                                                                                className="text-xs"
-                                                                                        >
-                                                                                                {tag}
-                                                                                        </Badge>
-                                                                                ))}
-                                                                        </div>
-                                                                )}
+                                                        </div>
+                                                        <div className="text-sm text-muted-foreground text-center sm:text-right">
+                                                                Page {currentPage} of {totalPages} ({sortedLogs.length}{' '}
+                                                                total entries)
                                                         </div>
                                                 </div>
-                                        );
-                                })}
-
-                                {/* Pagination Controls */}
-                                {totalPages > 1 && (
-                                        <div className="flex flex-col items-center gap-3 pt-4">
-                                                <div className="flex items-center gap-2">
-                                                        <Button
-                                                                variant="outline"
-                                                                size="sm"
-                                                                onClick={() =>
-                                                                        setCurrentPage(Math.max(1, currentPage - 1))
-                                                                }
-                                                                disabled={currentPage === 1}
-                                                        >
-                                                                Previous
-                                                        </Button>
-                                                        <Button
-                                                                variant="outline"
-                                                                size="sm"
-                                                                onClick={() =>
-                                                                        setCurrentPage(
-                                                                                Math.min(totalPages, currentPage + 1),
-                                                                        )
-                                                                }
-                                                                disabled={currentPage === totalPages}
-                                                        >
-                                                                Next
-                                                        </Button>
-                                                </div>
-                                                <span className="text-sm text-muted-foreground text-center">
-                                                        Page {currentPage} of {totalPages}
-                                                </span>
                                         </div>
-                                )}
-                        </CardContent>
-                </Card>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                        {displayedLogs.map((log) => {
+                                                const isExpanded = expandedLogs.has(log._id);
+                                                const hasLongContent =
+                                                        (log.note && log.note.length > 200) || log.tags.length > 5;
+
+                                                return (
+                                                        <div
+                                                                key={log._id}
+                                                                className="flex items-start space-x-4 p-4 rounded-lg border border-primary/50 bg-white group"
+                                                        >
+                                                                <div className="text-3xl flex-shrink-0">
+                                                                        {moodEmojis[log.mood]}
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                                                                                <Badge className={moodColors[log.mood]}>
+                                                                                        {moodLabels[log.mood]}
+                                                                                </Badge>
+                                                                                <span className="text-sm text-muted-foreground">
+                                                                                        {formatDate(log.createdAt)} at{' '}
+                                                                                        {formatTime(log.createdAt)}
+                                                                                </span>
+                                                                                <div className="ml-auto">
+                                                                                        <DropdownMenu>
+                                                                                                <DropdownMenuTrigger
+                                                                                                        asChild
+                                                                                                >
+                                                                                                        <Button
+                                                                                                                variant="ghost"
+                                                                                                                size="sm"
+                                                                                                                className="h-6 w-6 p-0"
+                                                                                                                title="More options"
+                                                                                                        >
+                                                                                                                <MoreHorizontal className="h-3 w-3" />
+                                                                                                        </Button>
+                                                                                                </DropdownMenuTrigger>
+                                                                                                <DropdownMenuContent align="end">
+                                                                                                        <DropdownMenuItem
+                                                                                                                onClick={() =>
+                                                                                                                        handleEdit(
+                                                                                                                                log,
+                                                                                                                        )
+                                                                                                                }
+                                                                                                                className="cursor-pointer "
+                                                                                                                title="Edit mood entry"
+                                                                                                        >
+                                                                                                                <Edit className="h-4 w-4 mr-2 hover:text-white" />
+                                                                                                                Edit
+                                                                                                                Entry
+                                                                                                        </DropdownMenuItem>
+                                                                                                        <DeleteDialog
+                                                                                                                title="Delete Mood Entry"
+                                                                                                                description="Are you sure you want to delete this mood entry? This action cannot be undone."
+                                                                                                                onDelete={() =>
+                                                                                                                        handleDeleteMood(
+                                                                                                                                log._id,
+                                                                                                                        )
+                                                                                                                }
+                                                                                                                trigger={
+                                                                                                                        <DropdownMenuItem
+                                                                                                                                onSelect={(
+                                                                                                                                        e,
+                                                                                                                                ) =>
+                                                                                                                                        e.preventDefault()
+                                                                                                                                }
+                                                                                                                                className="cursor-pointer text-destructive"
+                                                                                                                                title="Delete mood entry"
+                                                                                                                        >
+                                                                                                                                <Trash2 className="h-4 w-4 mr-2  hover:text-white" />
+                                                                                                                                Delete
+                                                                                                                                Entry
+                                                                                                                        </DropdownMenuItem>
+                                                                                                                }
+                                                                                                        />
+                                                                                                </DropdownMenuContent>
+                                                                                        </DropdownMenu>
+                                                                                </div>
+                                                                        </div>
+                                                                        {log.note && (
+                                                                                <p
+                                                                                        className={`text-sm text-muted-foreground mb-2 ${
+                                                                                                !isExpanded &&
+                                                                                                hasLongContent
+                                                                                                        ? 'line-clamp-2'
+                                                                                                        : ''
+                                                                                        }`}
+                                                                                >
+                                                                                        {log.note}
+                                                                                </p>
+                                                                        )}
+                                                                        {hasLongContent && (
+                                                                                <Button
+                                                                                        variant="outline"
+                                                                                        size="sm"
+                                                                                        onClick={() =>
+                                                                                                toggleExpanded(log._id)
+                                                                                        }
+                                                                                        className="mb-2 p-1 h-auto text-xs text-primary hover:text-white"
+                                                                                >
+                                                                                        {isExpanded ? (
+                                                                                                <>
+                                                                                                        <ChevronUp className="h-3 w-3 mr-1" />
+                                                                                                        See less
+                                                                                                </>
+                                                                                        ) : (
+                                                                                                <>
+                                                                                                        <ChevronDown className="h-3 w-3 mr-1" />
+                                                                                                        See more
+                                                                                                </>
+                                                                                        )}
+                                                                                </Button>
+                                                                        )}
+                                                                        {log.tags.length > 0 && (
+                                                                                <div
+                                                                                        className={`flex flex-wrap gap-1 ${
+                                                                                                !isExpanded &&
+                                                                                                log.tags.length > 5
+                                                                                                        ? 'max-h-6 overflow-hidden'
+                                                                                                        : ''
+                                                                                        }`}
+                                                                                >
+                                                                                        {log.tags.map((tag) => (
+                                                                                                <Badge
+                                                                                                        key={tag}
+                                                                                                        variant="outline"
+                                                                                                        className="text-xs"
+                                                                                                >
+                                                                                                        {tag}
+                                                                                                </Badge>
+                                                                                        ))}
+                                                                                </div>
+                                                                        )}
+                                                                </div>
+                                                        </div>
+                                                );
+                                        })}
+
+                                        {/* Pagination Controls */}
+                                        {totalPages > 1 && (
+                                                <div className="flex flex-col items-center gap-3 pt-4">
+                                                        <div className="flex items-center gap-2">
+                                                                <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() =>
+                                                                                setCurrentPage(
+                                                                                        Math.max(1, currentPage - 1),
+                                                                                )
+                                                                        }
+                                                                        disabled={currentPage === 1}
+                                                                >
+                                                                        Previous
+                                                                </Button>
+                                                                <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() =>
+                                                                                setCurrentPage(
+                                                                                        Math.min(
+                                                                                                totalPages,
+                                                                                                currentPage + 1,
+                                                                                        ),
+                                                                                )
+                                                                        }
+                                                                        disabled={currentPage === totalPages}
+                                                                >
+                                                                        Next
+                                                                </Button>
+                                                        </div>
+                                                        <span className="text-sm text-muted-foreground text-center">
+                                                                Page {currentPage} of {totalPages}
+                                                        </span>
+                                                </div>
+                                        )}
+                                </CardContent>
+                        </Card>
+
+                        {/* Edit Modal */}
+                        <MoodEditModal
+                                isOpen={isEditModalOpen}
+                                onClose={() => {
+                                        setIsEditModalOpen(false);
+                                        setEditingLog(null);
+                                }}
+                                moodLog={editingLog}
+                                onSave={handleSaveEdit}
+                        />
+                </>
         );
 }

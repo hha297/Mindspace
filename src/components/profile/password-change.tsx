@@ -64,12 +64,13 @@ export function PasswordChange({
                                                                 updatePasswordData('currentPassword', e.target.value)
                                                         }
                                                         placeholder="Enter current password"
+                                                        className="bg-white border-primary/50"
                                                 />
                                                 <Button
                                                         type="button"
                                                         variant="ghost"
                                                         size="sm"
-                                                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                                        className="absolute right-0 top-0 h-full px-3 py-2"
                                                         onClick={() => togglePasswordVisibility('current')}
                                                 >
                                                         {showPasswords.current ? (
@@ -92,12 +93,13 @@ export function PasswordChange({
                                                                 updatePasswordData('newPassword', e.target.value)
                                                         }
                                                         placeholder="Enter new password"
+                                                        className="bg-white border-primary/50"
                                                 />
                                                 <Button
                                                         type="button"
                                                         variant="ghost"
                                                         size="sm"
-                                                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                                        className="absolute right-0 top-0 h-full px-3 py-2"
                                                         onClick={() => togglePasswordVisibility('new')}
                                                 >
                                                         {showPasswords.new ? (
@@ -120,12 +122,13 @@ export function PasswordChange({
                                                                 updatePasswordData('confirmPassword', e.target.value)
                                                         }
                                                         placeholder="Confirm new password"
+                                                        className="bg-white border-primary/50"
                                                 />
                                                 <Button
                                                         type="button"
                                                         variant="ghost"
                                                         size="sm"
-                                                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                                        className="absolute right-0 top-0 h-full px-3 py-2"
                                                         onClick={() => togglePasswordVisibility('confirm')}
                                                 >
                                                         {showPasswords.confirm ? (

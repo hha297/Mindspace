@@ -7,8 +7,8 @@ import { MoodChart } from '@/components/mood-chart';
 import { AchievementSystem } from '@/components/achievement-system';
 import { StreakCelebration } from '@/components/streak-celebration';
 import { ProgressCelebration } from '@/components/progress-celebration';
-import { Card, CardContent } from '@/components/ui/card';
-import { TrendingUp } from 'lucide-react';
+
+import { SelfHelpTools } from '@/components/dashboard/self-help-tools';
 
 interface UserStats {
         streakCount: number;
@@ -44,6 +44,11 @@ export function DashboardContent({
 
                         {/* Main Content Grid */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                {/* Left Column - Full Width Mood Chart */}
+                                <div className="lg:col-span-2">
+                                        <MoodChart />
+                                </div>
+
                                 {/* Left Column */}
                                 <div className="space-y-8">
                                         {/* Mood Tracker */}
@@ -51,25 +56,33 @@ export function DashboardContent({
                                                 <MoodTracker onMoodLogged={onMoodLogged} />
                                         </div>
 
-                                        {/* Mood History */}
-                                        <div>
+                                        {/* Mood History - Hidden on PC, shown on mobile */}
+                                        <div className="lg:hidden">
                                                 <MoodHistory />
                                         </div>
 
-                                        {/* Mood Chart */}
-                                        <div>
-                                                <MoodChart />
+                                        {/* Achievement System - Shown on PC in left column */}
+                                        <div className="hidden lg:block">
+                                                <AchievementSystem
+                                                        userStats={userStats}
+                                                        onAchievementUnlocked={onAchievementUnlocked}
+                                                />
                                         </div>
                                 </div>
 
                                 {/* Right Column */}
                                 <div className="space-y-8">
-                                        {/* Achievement System */}
-                                        <div>
+                                        {/* Achievement System - Hidden on PC, shown on mobile */}
+                                        <div className="lg:hidden">
                                                 <AchievementSystem
                                                         userStats={userStats}
                                                         onAchievementUnlocked={onAchievementUnlocked}
                                                 />
+                                        </div>
+
+                                        {/* Mood History - Shown on PC in right column */}
+                                        <div className="hidden lg:block">
+                                                <MoodHistory />
                                         </div>
 
                                         {/* Weekly Goal */}
@@ -80,53 +93,9 @@ export function DashboardContent({
                                                         streakCount={userStats?.streakCount || 0}
                                                 />
                                         </div>
-
-                                        {/* Progress Insight */}
-                                        <div>
-                                                <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-                                                        <CardContent className="p-6">
-                                                                <div className="flex items-center space-x-2 mb-4">
-                                                                        <TrendingUp className="h-5 w-5 text-blue-600" />
-                                                                        <h3 className="font-semibold text-blue-800">
-                                                                                Progress Insight
-                                                                        </h3>
-                                                                </div>
-                                                                <div className="space-y-4">
-                                                                        <div className="flex items-center justify-between">
-                                                                                <span className="text-sm text-blue-600">
-                                                                                        Mood Consistency
-                                                                                </span>
-                                                                                <span className="text-sm font-medium text-blue-800">
-                                                                                        {userStats?.totalMoodLogs &&
-                                                                                        userStats.totalMoodLogs > 0
-                                                                                                ? 'Good'
-                                                                                                : 'Getting Started'}
-                                                                                </span>
-                                                                        </div>
-                                                                        <div className="flex items-center justify-between">
-                                                                                <span className="text-sm text-blue-600">
-                                                                                        Average Mood
-                                                                                </span>
-                                                                                <span className="text-sm font-medium text-blue-800">
-                                                                                        {userStats?.averageMood
-                                                                                                ? userStats.averageMood.toFixed(
-                                                                                                          1,
-                                                                                                  )
-                                                                                                : 'N/A'}
-                                                                                </span>
-                                                                        </div>
-                                                                        <div className="flex items-center justify-between">
-                                                                                <span className="text-sm text-blue-600">
-                                                                                        Current Streak
-                                                                                </span>
-                                                                                <span className="text-sm font-medium text-blue-800">
-                                                                                        {userStats?.streakCount || 0}{' '}
-                                                                                        days
-                                                                                </span>
-                                                                        </div>
-                                                                </div>
-                                                        </CardContent>
-                                                </Card>
+                                        {/* Self-Help Tools - Shown on PC in right column */}
+                                        <div className="hidden lg:block">
+                                                <SelfHelpTools />
                                         </div>
                                 </div>
                         </div>

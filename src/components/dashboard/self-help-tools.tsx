@@ -15,7 +15,7 @@ export function SelfHelpTools() {
                                 <h2 className="text-xl font-semibold text-gray-800">Self-Help Tools</h2>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Breathing Exercise Card */}
                                 <Card className="bg-green-50 border-green-200 hover:shadow-md transition-shadow">
                                         <CardContent className="p-6 text-center">
@@ -30,7 +30,7 @@ export function SelfHelpTools() {
                                                                 Take 5 minutes to calm your mind
                                                         </CardDescription>
                                                 </div>
-                                                <Link href="/tools">
+                                                <Link href="/tools?tab=breathing">
                                                         <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
                                                                 Start Exercise
                                                         </Button>
@@ -52,7 +52,7 @@ export function SelfHelpTools() {
                                                                 Express your thoughts and feelings
                                                         </CardDescription>
                                                 </div>
-                                                <Link href="/tools">
+                                                <Link href="/tools?tab=journaling">
                                                         <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
                                                                 Start Writing
                                                         </Button>
@@ -74,7 +74,7 @@ export function SelfHelpTools() {
                                                                 Check in with your mental health
                                                         </CardDescription>
                                                 </div>
-                                                <Link href="/tools">
+                                                <Link href="/tools?tab=assessment">
                                                         <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                                                                 Take Assessment
                                                         </Button>

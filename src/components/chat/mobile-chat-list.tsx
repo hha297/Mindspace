@@ -21,6 +21,7 @@ interface ChatSession {
 
 interface MobileChatListProps {
         chatSessions: ChatSession[];
+        currentSession: ChatSession | null;
         searchQuery: string;
         setSearchQuery: (query: string) => void;
         onCreateNewChat: () => void;
@@ -32,6 +33,7 @@ interface MobileChatListProps {
 
 export function MobileChatList({
         chatSessions,
+        currentSession,
         searchQuery,
         setSearchQuery,
         onCreateNewChat,
@@ -78,12 +80,23 @@ export function MobileChatList({
                                         filteredChatSessions.map((chatSession) => (
                                                 <div
                                                         key={chatSession._id}
-                                                        className="p-4 border-b cursor-pointer hover:bg-muted/50 transition-colors"
+                                                        className={`p-4 border-b cursor-pointer hover:bg-muted/20 transition-colors ${
+                                                                currentSession?._id === chatSession._id
+                                                                        ? 'bg-primary/10 border-primary/20 border-l-4 border-l-primary/40'
+                                                                        : ''
+                                                        }`}
                                                         onClick={() => onSelectChat(chatSession)}
                                                 >
                                                         <div className="flex items-center justify-between">
                                                                 <div className="flex-1 min-w-0">
-                                                                        <h3 className="font-medium text-sm truncate mb-1">
+                                                                        <h3
+                                                                                className={`font-medium text-sm truncate mb-1 ${
+                                                                                        currentSession?._id ===
+                                                                                        chatSession._id
+                                                                                                ? 'text-primary/80 font-semibold'
+                                                                                                : ''
+                                                                                }`}
+                                                                        >
                                                                                 {chatSession.title}
                                                                         </h3>
                                                                         <p className="text-xs text-muted-foreground truncate">

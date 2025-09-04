@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Users, Heart, BookOpen, TrendingUp, Calendar } from 'lucide-react';
+import { Users, Heart, BookOpen, TrendingUp, Calendar, AlertTriangle } from 'lucide-react';
 import {
         LineChart,
         Line,
@@ -24,9 +24,12 @@ interface AdminStats {
         totalUsers: number;
         totalMoodLogs: number;
         totalResources: number;
+        totalStressAssessments: number;
         recentUsers: any[];
         moodDistribution: any[];
         dailyActiveUsers: any[];
+        stressLevelDistribution: any[];
+        recentStressAssessments: any[];
 }
 
 const getMoodLabel = (mood: number) => {
@@ -112,6 +115,18 @@ export default function AdminDashboard() {
                         color: getMoodColor(item._id),
                 })) || [];
 
+        const stressLevelDistributionData =
+                stats?.stressLevelDistribution.map((item) => ({
+                        name: item._id,
+                        value: item.count,
+                        color:
+                                item._id === 'Low Stress'
+                                        ? '#22c55e'
+                                        : item._id === 'Moderate Stress'
+                                        ? '#f59e0b'
+                                        : '#ef4444',
+                })) || [];
+
         return (
                 <div className="p-4 md:p-8">
                         <div className="mb-8">
@@ -122,7 +137,7 @@ export default function AdminDashboard() {
                         </div>
 
                         {/* Stats Cards */}
-                        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+                        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 mb-6 md:mb-8">
                                 <Card>
                                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                                 <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -170,9 +185,24 @@ export default function AdminDashboard() {
                                                 <p className="text-xs text-muted-foreground">Avg logs per user</p>
                                         </CardContent>
                                 </Card>
+
+                                <Card>
+                                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                                <CardTitle className="text-sm font-medium">
+                                                        Stress Assessments
+                                                </CardTitle>
+                                                <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                                        </CardHeader>
+                                        <CardContent>
+                                                <div className="text-2xl font-bold">
+                                                        {stats?.totalStressAssessments || 0}
+                                                </div>
+                                                <p className="text-xs text-muted-foreground">Completed assessments</p>
+                                        </CardContent>
+                                </Card>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
                                 {/* Daily Active Users Chart */}
                                 <Card>
                                         <CardHeader>
@@ -252,8 +282,104 @@ export default function AdminDashboard() {
                                                 </ResponsiveContainer>
                                         </CardContent>
                                 </Card>
+
+                                {/* Stress Level Distribution Chart */}
+                                <Card>
+                                        <CardHeader>
+                                                <CardTitle>Stress Level Distribution</CardTitle>
+                                                <CardDescription>
+                                                        Distribution of stress assessment results across all users
+                                                </CardDescription>
+                                        </CardHeader>
+                                        <CardContent>
+                                                <ResponsiveContainer width="100%" height={300}>
+                                                        <PieChart>
+                                                                <Pie
+                                                                        data={stressLevelDistributionData}
+                                                                        cx="50%"
+                                                                        cy="50%"
+                                                                        outerRadius={80}
+                                                                        fill="#8884d8"
+                                                                        dataKey="value"
+                                                                        label={({ name, percent }) =>
+                                                                                `${name} ${(percent * 100).toFixed(0)}%`
+                                                                        }
+                                                                >
+                                                                        {stressLevelDistributionData.map(
+                                                                                (entry, index) => (
+                                                                                        <Cell
+                                                                                                key={`cell-${index}`}
+                                                                                                fill={entry.color}
+                                                                                        />
+                                                                                ),
+                                                                        )}
+                                                                </Pie>
+                                                                <Tooltip />
+                                                        </PieChart>
+                                                </ResponsiveContainer>
+                                        </CardContent>
+                                </Card>
                         </div>
 
+                        {/* Recent Stress Assessments */}
+                        <Card className="mb-8">
+                                <CardHeader>
+                                        <CardTitle>Recent Stress Assessments</CardTitle>
+                                        <CardDescription>Latest stress assessment completions</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                        <div className="space-y-4">
+                                                {stats?.recentStressAssessments.map((assessment) => (
+                                                        <div
+                                                                key={assessment._id}
+                                                                className="flex items-center justify-between p-4 border rounded-lg"
+                                                        >
+                                                                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                                                                        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                                                                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                                                                        </div>
+                                                                        <div className="flex-1 min-w-0">
+                                                                                <p className="font-medium text-sm truncate">
+                                                                                        {assessment.userId?.name ||
+                                                                                                assessment.userId
+                                                                                                        ?.email ||
+                                                                                                'Anonymous'}
+                                                                                </p>
+                                                                                <p className="text-xs text-muted-foreground truncate">
+                                                                                        Score: {assessment.score}/50
+                                                                                </p>
+                                                                        </div>
+                                                                </div>
+                                                                <div className="text-right flex-shrink-0 ml-2">
+                                                                        <Badge
+                                                                                variant="secondary"
+                                                                                className={`text-xs ${
+                                                                                        assessment.level ===
+                                                                                        'Low Stress'
+                                                                                                ? 'bg-green-100 text-green-800'
+                                                                                                : assessment.level ===
+                                                                                                  'Moderate Stress'
+                                                                                                ? 'bg-yellow-100 text-yellow-800'
+                                                                                                : 'bg-red-100 text-red-800'
+                                                                                }`}
+                                                                        >
+                                                                                {assessment.level}
+                                                                        </Badge>
+                                                                        <p className="text-xs text-muted-foreground mt-1">
+                                                                                <Calendar className="h-3 w-3 inline mr-1" />
+                                                                                {format(
+                                                                                        new Date(
+                                                                                                assessment.completedAt,
+                                                                                        ),
+                                                                                        'MMM d, yyyy',
+                                                                                )}
+                                                                        </p>
+                                                                </div>
+                                                        </div>
+                                                ))}
+                                        </div>
+                                </CardContent>
+                        </Card>
                         {/* Recent Users */}
                         <Card className="mb-8">
                                 <CardHeader>

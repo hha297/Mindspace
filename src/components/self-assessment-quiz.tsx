@@ -7,120 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { AlertTriangle, CheckCircle, Info, ArrowRight, RotateCcw } from 'lucide-react';
-
-interface Question {
-        id: string;
-        question: string;
-        options: { value: number; label: string }[];
-}
-
-interface Quiz {
-        id: string;
-        title: string;
-        description: string;
-        questions: Question[];
-        scoring: {
-                ranges: { min: number; max: number; level: string; description: string; color: string; icon: any }[];
-        };
-}
-
-const stressQuiz: Quiz = {
-        id: 'stress-assessment',
-        title: 'Stress Level Assessment',
-        description: 'This brief assessment can help you understand your current stress levels.',
-        questions: [
-                {
-                        id: 'q1',
-                        question: 'How often have you felt nervous or stressed in the past week?',
-                        options: [
-                                { value: 0, label: 'Never' },
-                                { value: 1, label: 'Almost never' },
-                                { value: 2, label: 'Sometimes' },
-                                { value: 3, label: 'Fairly often' },
-                                { value: 4, label: 'Very often' },
-                        ],
-                },
-                {
-                        id: 'q2',
-                        question: 'How often have you felt unable to control important things in your life?',
-                        options: [
-                                { value: 0, label: 'Never' },
-                                { value: 1, label: 'Almost never' },
-                                { value: 2, label: 'Sometimes' },
-                                { value: 3, label: 'Fairly often' },
-                                { value: 4, label: 'Very often' },
-                        ],
-                },
-                {
-                        id: 'q3',
-                        question: 'How often have you felt confident about handling personal problems?',
-                        options: [
-                                { value: 4, label: 'Never' },
-                                { value: 3, label: 'Almost never' },
-                                { value: 2, label: 'Sometimes' },
-                                { value: 1, label: 'Fairly often' },
-                                { value: 0, label: 'Very often' },
-                        ],
-                },
-                {
-                        id: 'q4',
-                        question: 'How often have you felt that things were going your way?',
-                        options: [
-                                { value: 4, label: 'Never' },
-                                { value: 3, label: 'Almost never' },
-                                { value: 2, label: 'Sometimes' },
-                                { value: 1, label: 'Fairly often' },
-                                { value: 0, label: 'Very often' },
-                        ],
-                },
-                {
-                        id: 'q5',
-                        question: "How often have you felt difficulties piling up so high you couldn't overcome them?",
-                        options: [
-                                { value: 0, label: 'Never' },
-                                { value: 1, label: 'Almost never' },
-                                { value: 2, label: 'Sometimes' },
-                                { value: 3, label: 'Fairly often' },
-                                { value: 4, label: 'Very often' },
-                        ],
-                },
-        ],
-        scoring: {
-                ranges: [
-                        {
-                                min: 0,
-                                max: 7,
-                                level: 'Low Stress',
-                                description:
-                                        "You're managing stress well. Keep up the good work with your current coping strategies.",
-                                color: 'text-green-700 bg-green-50 border-green-300',
-                                icon: CheckCircle,
-                        },
-                        {
-                                min: 8,
-                                max: 13,
-                                level: 'Moderate Stress',
-                                description:
-                                        "You're experiencing some stress. Consider incorporating stress-reduction techniques into your routine.",
-                                color: 'text-yellow-700 bg-yellow-50 border-yellow-200',
-                                icon: Info,
-                        },
-                        {
-                                min: 14,
-                                max: 20,
-                                level: 'High Stress',
-                                description:
-                                        "You're experiencing significant stress. It may be helpful to speak with a counselor or mental health professional.",
-                                color: 'text-red-700 bg-red-50 border-red-200',
-                                icon: AlertTriangle,
-                        },
-                ],
-        },
-};
+import { ArrowRight, RotateCcw, Info } from 'lucide-react';
+import { createStressQuiz, Quiz } from '@/lib/stress-quiz-data';
 
 export function SelfAssessmentQuiz() {
-        const [currentQuiz] = useState<Quiz>(stressQuiz);
+        const [currentQuiz, setCurrentQuiz] = useState<Quiz>(() => createStressQuiz(10));
         const [currentQuestion, setCurrentQuestion] = useState(0);
         const [answers, setAnswers] = useState<Record<string, number>>({});
         const [isCompleted, setIsCompleted] = useState(false);
@@ -138,18 +29,48 @@ export function SelfAssessmentQuiz() {
                 }
         };
 
-        const completeQuiz = () => {
+        const completeQuiz = async () => {
                 const totalScore = Object.values(answers).reduce((sum, value) => sum + value, 0);
                 const scoreRange = currentQuiz.scoring.ranges.find(
                         (range) => totalScore >= range.min && totalScore <= range.max,
                 );
 
-                setResult({
+                const resultData = {
                         score: totalScore,
                         maxScore: currentQuiz.questions.length * 4,
                         ...scoreRange,
-                });
+                };
+
+                setResult(resultData);
                 setIsCompleted(true);
+
+                // Save to database
+                try {
+                        const questionsData = currentQuiz.questions.map((q) => ({
+                                questionId: q.id,
+                                question: q.question,
+                                answer: answers[q.id] || 0,
+                                options: q.options,
+                        }));
+
+                        const response = await fetch('/api/stress-assessment', {
+                                method: 'POST',
+                                headers: {
+                                        'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                        score: totalScore,
+                                        level: scoreRange?.level || 'Unknown',
+                                        questions: questionsData,
+                                }),
+                        });
+
+                        if (!response.ok) {
+                                console.error('Failed to save stress assessment');
+                        }
+                } catch (error) {
+                        console.error('Error saving stress assessment:', error);
+                }
         };
 
         const resetQuiz = () => {
@@ -157,6 +78,7 @@ export function SelfAssessmentQuiz() {
                 setAnswers({});
                 setIsCompleted(false);
                 setResult(null);
+                setCurrentQuiz(createStressQuiz(10));
         };
 
         const progress = ((currentQuestion + 1) / currentQuiz.questions.length) * 100;
@@ -164,7 +86,7 @@ export function SelfAssessmentQuiz() {
         const canProceed = answers[currentQ?.id] !== undefined;
 
         if (isCompleted && result) {
-                const IconComponent = result.icon;
+                const IconComponent = result.icon || Info;
                 return (
                         <Card className="w-full max-w-2xl mx-auto">
                                 <CardHeader>

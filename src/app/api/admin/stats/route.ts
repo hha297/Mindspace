@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import dbConnect from '@/lib/db';
+import { connectDB } from '@/lib/db';
 import User from '@/lib/models/User';
 import MoodLog from '@/lib/models/MoodLog';
 import Resource from '@/lib/models/Resource';
+import { StressAssessment } from '@/lib/models/StressAssessment';
 
 export async function GET() {
         try {
@@ -18,15 +19,17 @@ export async function GET() {
                         return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
                 }
 
-                await dbConnect();
+                await connectDB();
 
                 // Get basic stats
-                const [totalUsers, totalMoodLogs, totalResources, recentUsers] = await Promise.all([
-                        User.countDocuments(),
-                        MoodLog.countDocuments(),
-                        Resource.countDocuments(),
-                        User.find().sort({ createdAt: -1 }).limit(5).select('name email createdAt streakCount'),
-                ]);
+                const [totalUsers, totalMoodLogs, totalResources, totalStressAssessments, recentUsers] =
+                        await Promise.all([
+                                User.countDocuments(),
+                                MoodLog.countDocuments(),
+                                Resource.countDocuments(),
+                                StressAssessment.countDocuments(),
+                                User.find().sort({ createdAt: -1 }).limit(5).select('name email createdAt streakCount'),
+                        ]);
 
                 // Get mood distribution
                 const moodDistribution = await MoodLog.aggregate([
@@ -67,13 +70,32 @@ export async function GET() {
                         },
                 ]);
 
+                // Get stress level distribution
+                const stressLevelDistribution = await StressAssessment.aggregate([
+                        {
+                                $group: {
+                                        _id: '$level',
+                                        count: { $sum: 1 },
+                                },
+                        },
+                ]);
+
+                // Get recent stress assessments
+                const recentStressAssessments = await StressAssessment.find()
+                        .sort({ completedAt: -1 })
+                        .limit(5)
+                        .populate('userId', 'name email');
+
                 return NextResponse.json({
                         totalUsers,
                         totalMoodLogs,
                         totalResources,
+                        totalStressAssessments,
                         recentUsers,
                         moodDistribution,
                         dailyActiveUsers,
+                        stressLevelDistribution,
+                        recentStressAssessments,
                 });
         } catch (error) {
                 console.error('Error fetching admin stats:', error);

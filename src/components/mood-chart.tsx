@@ -16,7 +16,7 @@ interface MoodLog {
 
 interface ChartData {
         date: string;
-        mood: number;
+        mood: number | null;
         label: string;
 }
 
@@ -71,18 +71,22 @@ export function MoodChart() {
                         const logDate = format(startOfDay(new Date(log.createdAt)), 'yyyy-MM-dd');
                         const dayData = last7Days.find((day) => day.date === logDate);
                         if (dayData) {
-                                dayData.mood = (dayData.mood * dayData.count + log.moodScore) / (dayData.count + 1);
-                                dayData.count += 1;
+                                if (dayData.count === 0) {
+                                        dayData.mood = log.moodScore;
+                                        dayData.count = 1;
+                                } else {
+                                        dayData.mood =
+                                                (dayData.mood * dayData.count + log.moodScore) / (dayData.count + 1);
+                                        dayData.count += 1;
+                                }
                         }
                 });
 
-                return last7Days
-                        .map(({ date, label, mood, count }) => ({
-                                date,
-                                label,
-                                mood: count > 0 ? Math.round(mood * 10) / 10 : null,
-                        }))
-                        .filter((day) => day.mood !== null) as ChartData[];
+                return last7Days.map(({ date, label, mood, count }) => ({
+                        date,
+                        label,
+                        mood: count > 0 ? Math.round(mood * 10) / 10 : null,
+                })) as ChartData[];
         };
 
         const getMoodDistribution = () => {
@@ -210,10 +214,15 @@ export function MoodChart() {
                                                                         dataKey="mood"
                                                                         stroke="hsl(var(--primary))"
                                                                         strokeWidth={2}
+                                                                        connectNulls={true}
                                                                         dot={{
                                                                                 fill: 'hsl(var(--primary))',
                                                                                 strokeWidth: 2,
                                                                                 r: 4,
+                                                                        }}
+                                                                        activeDot={{
+                                                                                r: 6,
+                                                                                fill: 'hsl(var(--primary))',
                                                                         }}
                                                                 />
                                                         </LineChart>

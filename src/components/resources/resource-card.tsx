@@ -64,7 +64,8 @@ export function ResourceCard({ resource }: ResourceCardProps) {
                                                 <div className="flex items-center gap-2 mb-2">
                                                         <Badge className={getTypeColor(resource.type)}>
                                                                 <TypeIcon className="h-3 w-3 mr-1" />
-                                                                {resource.type}
+                                                                {resource.type.charAt(0).toUpperCase() +
+                                                                        resource.type.slice(1)}
                                                         </Badge>
                                                         <Badge variant="outline">{resource.category}</Badge>
                                                         {resource.featured && (
@@ -83,7 +84,7 @@ export function ResourceCard({ resource }: ResourceCardProps) {
                                                 {resource.duration && (
                                                         <div className="flex items-center gap-1">
                                                                 <Clock className="h-4 w-4" />
-                                                                {resource.duration}
+                                                                {resource.duration} minutes
                                                         </div>
                                                 )}
                                                 {resource.views && (
