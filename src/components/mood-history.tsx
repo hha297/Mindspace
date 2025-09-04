@@ -217,7 +217,7 @@ export function MoodHistory() {
                                 {/* Sorting Controls */}
                                 <div className="flex flex-col gap-4 mt-4">
                                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                                <div className="flex flex-col sm:flex-row items-start sm:items-center  gap-2">
                                                         <Label className="text-sm">Sort by:</Label>
                                                         <div className="flex gap-2">
                                                                 <select

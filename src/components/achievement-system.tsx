@@ -22,11 +22,11 @@ interface Achievement {
 }
 
 interface AchievementSystemProps {
-        userStats: {
+        userStats?: {
                 streakCount: number;
                 totalMoodLogs: number;
                 badges: string[];
-        };
+        } | null;
         onAchievementUnlocked?: (achievement: Achievement) => void;
 }
 
@@ -145,6 +145,8 @@ export function AchievementSystem({ userStats, onAchievementUnlocked }: Achievem
         };
 
         const updateAchievements = useCallback(() => {
+                if (!userStats) return;
+
                 const updatedAchievements = achievementDefinitions.map((def) => {
                         let currentProgress = 0;
                         let isUnlocked = false;
@@ -200,13 +202,7 @@ export function AchievementSystem({ userStats, onAchievementUnlocked }: Achievem
                 });
 
                 setAchievements(updatedAchievements);
-        }, [
-                userStats.badges,
-                userStats.totalMoodLogs,
-                userStats.streakCount,
-                onAchievementUnlocked,
-                markAchievementAsViewed,
-        ]);
+        }, [userStats, onAchievementUnlocked, markAchievementAsViewed]);
 
         useEffect(() => {
                 updateAchievements();
@@ -215,6 +211,28 @@ export function AchievementSystem({ userStats, onAchievementUnlocked }: Achievem
         const unlockedAchievements = achievements.filter((a) => a.isUnlocked);
         const inProgressAchievements = achievements.filter((a) => !a.isUnlocked && a.currentProgress > 0);
         const lockedAchievements = achievements.filter((a) => !a.isUnlocked && a.currentProgress === 0);
+
+        // Show loading state if userStats is not available
+        if (!userStats) {
+                return (
+                        <Card>
+                                <CardHeader>
+                                        <CardTitle className="flex items-center justify-center sm:justify-start space-x-2">
+                                                <Trophy className="h-6 w-6 sm:h-5 sm:w-5 text-yellow-500" />
+                                                <span>Achievements</span>
+                                        </CardTitle>
+                                        <CardDescription className="text-center sm:text-left">
+                                                Track your progress and unlock badges for your mental health journey
+                                        </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-6">
+                                        <div className="text-center py-8">
+                                                <div className="text-muted-foreground">Loading achievements...</div>
+                                        </div>
+                                </CardContent>
+                        </Card>
+                );
+        }
 
         return (
                 <>
