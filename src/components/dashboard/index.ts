@@ -1,4 +1,4 @@
 export { DashboardHeader } from './dashboard-header';
 export { StatsCards } from './stats-cards';
-export { QuickActions } from './quick-actions';
+export { SelfHelpTools } from './self-help-tools';
 export { DashboardContent } from './dashboard-content';

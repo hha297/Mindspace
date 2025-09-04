@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 // Dashboard Components
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { StatsCards } from '@/components/dashboard/stats-cards';
-import { QuickActions } from '@/components/dashboard/quick-actions';
+import { SelfHelpTools } from '@/components/dashboard/self-help-tools';
 import { DashboardContent } from '@/components/dashboard/dashboard-content';
 
 interface UserStats {
@@ -139,9 +139,6 @@ export default function DashboardPage() {
                                 {/* Stats Cards */}
                                 <StatsCards userStats={userStats} />
 
-                                {/* Quick Actions */}
-                                <QuickActions />
-
                                 {/* Main Content */}
                                 <DashboardContent
                                         userStats={userStats}
@@ -149,6 +146,9 @@ export default function DashboardPage() {
                                         onAchievementUnlocked={handleAchievementUnlocked}
                                         onMoodLogged={handleMoodLogged}
                                 />
+
+                                {/* Self-Help Tools */}
+                                <SelfHelpTools />
                         </main>
                 </div>
         );

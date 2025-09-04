@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { MoodTracker } from '@/components/mood-tracker';
@@ -96,7 +97,8 @@ export function DashboardContent({
                                                                                         Mood Consistency
                                                                                 </span>
                                                                                 <span className="text-sm font-medium text-blue-800">
-                                                                                        {userStats?.totalMoodLogs > 0
+                                                                                        {userStats?.totalMoodLogs &&
+                                                                                        userStats.totalMoodLogs > 0
                                                                                                 ? 'Good'
                                                                                                 : 'Getting Started'}
                                                                                 </span>

@@ -1,8 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+
 import { Activity, PenTool, ClipboardList, Sparkles } from 'lucide-react';
 
 export function QuickActions() {

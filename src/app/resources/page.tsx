@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+
 import { Navbar } from '@/components/navbar';
 import { EmergencyBanner } from '@/components/emergency-banner';
 import { toast } from 'sonner';
@@ -29,12 +29,11 @@ interface Category {
 }
 
 export default function ResourcesPage() {
-        const router = useRouter();
         const [resources, setResources] = useState<Resource[]>([]);
         const [featuredResources, setFeaturedResources] = useState<Resource[]>([]);
         const [categories, setCategories] = useState<Category[]>([]);
         const [isLoading, setIsLoading] = useState(true);
-        const [currentPage, setCurrentPage] = useState(1);
+
         const [totalPages, setTotalPages] = useState(1);
         const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
         const itemsPerPage = 4;
