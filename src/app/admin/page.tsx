@@ -87,7 +87,7 @@ export default function AdminDashboard() {
 
         if (isLoading) {
                 return (
-                        <div className="p-8">
+                        <div className="p-4 md:p-8">
                                 <div className="mb-8">
                                         <Skeleton className="h-8 w-64 mb-2" />
                                         <Skeleton className="h-4 w-96" />
@@ -113,7 +113,7 @@ export default function AdminDashboard() {
                 })) || [];
 
         return (
-                <div className="p-8">
+                <div className="p-4 md:p-8">
                         <div className="mb-8">
                                 <h1 className="text-3xl font-bold text-foreground mb-2">Admin Dashboard</h1>
                                 <p className="text-muted-foreground">
@@ -122,7 +122,7 @@ export default function AdminDashboard() {
                         </div>
 
                         {/* Stats Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
                                 <Card>
                                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                                 <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -172,7 +172,7 @@ export default function AdminDashboard() {
                                 </Card>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
                                 {/* Daily Active Users Chart */}
                                 <Card>
                                         <CardHeader>
@@ -267,24 +267,24 @@ export default function AdminDashboard() {
                                                                 key={user._id}
                                                                 className="flex items-center justify-between p-4 border rounded-lg"
                                                         >
-                                                                <div className="flex items-center space-x-4">
-                                                                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                                                                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                                                                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
                                                                                 <span className="text-sm font-medium text-primary">
                                                                                         {user.name?.charAt(0) ||
                                                                                                 user.email.charAt(0)}
                                                                                 </span>
                                                                         </div>
-                                                                        <div>
-                                                                                <p className="font-medium">
+                                                                        <div className="flex-1 min-w-0">
+                                                                                <p className="font-medium text-sm truncate">
                                                                                         {user.name || 'Anonymous'}
                                                                                 </p>
-                                                                                <p className="text-sm text-muted-foreground">
+                                                                                <p className="text-xs text-muted-foreground truncate">
                                                                                         {user.email}
                                                                                 </p>
                                                                         </div>
                                                                 </div>
-                                                                <div className="text-right">
-                                                                        <Badge variant="secondary">
+                                                                <div className="text-right flex-shrink-0 ml-2">
+                                                                        <Badge variant="secondary" className="text-xs">
                                                                                 {user.streakCount} day streak
                                                                         </Badge>
                                                                         <p className="text-xs text-muted-foreground mt-1">

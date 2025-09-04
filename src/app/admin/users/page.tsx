@@ -157,7 +157,7 @@ export default function AdminUsersPage() {
 
         if (isLoading && !usersData) {
                 return (
-                        <div className="p-8">
+                        <div className="p-4 md:p-8">
                                 <div className="mb-8">
                                         <Skeleton className="h-8 w-64 mb-2" />
                                         <Skeleton className="h-4 w-96" />
@@ -168,14 +168,14 @@ export default function AdminUsersPage() {
         }
 
         return (
-                <div className="p-8">
+                <div className="p-4 md:p-8">
                         <div className="mb-8">
                                 <h1 className="text-3xl font-bold text-foreground mb-2">User Management</h1>
                                 <p className="text-muted-foreground">Manage registered users and view their activity</p>
                         </div>
 
                         {/* Stats Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
                                 <Card>
                                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                                 <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -229,7 +229,7 @@ export default function AdminUsersPage() {
                                         <CardDescription>Find users by name or email</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                        <form onSubmit={handleSearch} className="flex gap-4">
+                                        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4">
                                                 <div className="flex-1">
                                                         <Input
                                                                 placeholder="Search by name or email..."
@@ -238,7 +238,7 @@ export default function AdminUsersPage() {
                                                                 className="bg-white border-primary/50"
                                                         />
                                                 </div>
-                                                <Button type="submit">
+                                                <Button type="submit" className="sm:w-auto">
                                                         <Search className="h-4 w-4 mr-2" />
                                                         Search
                                                 </Button>
@@ -246,210 +246,375 @@ export default function AdminUsersPage() {
                                 </CardContent>
                         </Card>
 
-                        {/* Users Table */}
-                        <Card>
-                                <CardHeader>
-                                        <CardTitle>Users ({usersData?.totalUsers || 0})</CardTitle>
-                                        <CardDescription>All registered users and their activity</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                        <Table>
-                                                <TableHeader>
-                                                        <TableRow>
-                                                                <TableHead>User</TableHead>
-                                                                <TableHead>Provider</TableHead>
-                                                                <TableHead className="text-center">Role</TableHead>
-                                                                <TableHead className="text-center">Joined</TableHead>
-                                                                <TableHead className="text-center">Streak</TableHead>
-                                                                <TableHead className="text-center">Mood Logs</TableHead>
-                                                                <TableHead className="text-center">
-                                                                        Last Active
-                                                                </TableHead>
-                                                                <TableHead className="text-center">Actions</TableHead>
-                                                        </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                        {usersData?.users.map((user) => (
-                                                                <TableRow key={user._id}>
-                                                                        <TableCell>
-                                                                                <div>
-                                                                                        <div className="font-medium">
-                                                                                                {user.name ||
-                                                                                                        'Anonymous'}
-                                                                                        </div>
-                                                                                        <div className="text-sm text-muted-foreground">
-                                                                                                {user.email}
-                                                                                        </div>
-                                                                                </div>
-                                                                        </TableCell>
-                                                                        <TableCell>
-                                                                                <Badge
+                        {/* Users List - Mobile Card View */}
+                        <div className="space-y-4 md:hidden">
+                                <div className="flex items-center justify-between">
+                                        <div>
+                                                <h2 className="text-xl font-semibold">
+                                                        Users ({usersData?.totalUsers || 0})
+                                                </h2>
+                                                <p className="text-sm text-muted-foreground">
+                                                        All registered users and their activity
+                                                </p>
+                                        </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-4">
+                                        {usersData?.users.map((user) => (
+                                                <Card key={user._id} className="p-4">
+                                                        <div className="flex items-start justify-between">
+                                                                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                                                                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                                                                <span className="text-sm font-medium text-primary">
+                                                                                        {(user.name || user.email)
+                                                                                                .charAt(0)
+                                                                                                .toUpperCase()}
+                                                                                </span>
+                                                                        </div>
+                                                                        <div className="flex-1 min-w-0">
+                                                                                <h3 className="font-medium text-sm truncate">
+                                                                                        {user.name || 'Anonymous'}
+                                                                                </h3>
+                                                                                <p className="text-xs text-muted-foreground truncate">
+                                                                                        {user.email}
+                                                                                </p>
+                                                                        </div>
+                                                                </div>
+
+                                                                <div className="flex flex-col items-end space-y-1 flex-shrink-0 ml-2">
+                                                                        <Badge
+                                                                                variant={
+                                                                                        user.role === 'admin'
+                                                                                                ? 'default'
+                                                                                                : 'secondary'
+                                                                                }
+                                                                                className="text-xs capitalize"
+                                                                        >
+                                                                                {user.role}
+                                                                        </Badge>
+                                                                        <Badge
+                                                                                variant="outline"
+                                                                                className="text-xs capitalize"
+                                                                        >
+                                                                                {user.provider}
+                                                                        </Badge>
+                                                                </div>
+                                                        </div>
+
+                                                        <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                                                                <div className="flex items-center space-x-1">
+                                                                        <Calendar className="h-3 w-3 text-muted-foreground" />
+                                                                        <span className="text-muted-foreground">
+                                                                                {format(
+                                                                                        new Date(user.createdAt),
+                                                                                        'MMM d, yyyy',
+                                                                                )}
+                                                                        </span>
+                                                                </div>
+                                                                <div className="flex items-center space-x-1">
+                                                                        <Flame className="h-3 w-3 text-orange-500" />
+                                                                        <span className="text-muted-foreground">
+                                                                                {user.streakCount} day streak
+                                                                        </span>
+                                                                </div>
+                                                                <div className="flex items-center space-x-1">
+                                                                        <Heart className="h-3 w-3 text-muted-foreground" />
+                                                                        <span className="text-muted-foreground">
+                                                                                {user.moodLogCount} logs
+                                                                        </span>
+                                                                </div>
+                                                                <div className="flex items-center space-x-1">
+                                                                        <span className="text-muted-foreground">
+                                                                                {user.lastMoodLog
+                                                                                        ? format(
+                                                                                                  new Date(
+                                                                                                          user.lastMoodLog,
+                                                                                                  ),
+                                                                                                  'MMM d',
+                                                                                          )
+                                                                                        : 'Never active'}
+                                                                        </span>
+                                                                </div>
+                                                        </div>
+
+                                                        <div className="mt-3 flex gap-2">
+                                                                <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() => handleUpdateUser(user._id)}
+                                                                        disabled={updatingUsers.has(user._id)}
+                                                                        className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                                >
+                                                                        <Edit className="h-3 w-3 mr-1" />
+                                                                        {updatingUsers.has(user._id)
+                                                                                ? 'Updating...'
+                                                                                : 'Edit'}
+                                                                </Button>
+                                                                <DeleteDialog
+                                                                        title="Delete User"
+                                                                        description={`Are you sure you want to delete ${
+                                                                                user.role
+                                                                        } "${
+                                                                                user.name || user.email
+                                                                        }"? This action cannot be undone and will also delete all their mood logs.`}
+                                                                        onDelete={() => handleDeleteUser(user._id)}
+                                                                        trigger={
+                                                                                <Button
                                                                                         variant="outline"
-                                                                                        className="capitalize"
-                                                                                >
-                                                                                        {user.provider}
-                                                                                </Badge>
-                                                                        </TableCell>
-                                                                        <TableCell className="text-center">
-                                                                                <Badge
-                                                                                        variant={
+                                                                                        size="sm"
+                                                                                        disabled={
+                                                                                                deletingUsers.has(
+                                                                                                        user._id,
+                                                                                                ) ||
                                                                                                 user.role === 'admin'
-                                                                                                        ? 'default'
-                                                                                                        : 'secondary'
                                                                                         }
-                                                                                        className="capitalize"
-                                                                                >
-                                                                                        {user.role}
-                                                                                </Badge>
-                                                                        </TableCell>
-                                                                        <TableCell>
-                                                                                <div className="flex items-center justify-center text-sm text-muted-foreground">
-                                                                                        <Calendar className="h-3 w-3 mr-1" />
-                                                                                        {format(
-                                                                                                new Date(
-                                                                                                        user.createdAt,
-                                                                                                ),
-                                                                                                'MMM d, yyyy',
+                                                                                        className={cn(
+                                                                                                'flex-1 text-red-600 hover:text-red-700 hover:bg-red-50',
+                                                                                                user.role === 'admin' &&
+                                                                                                        'opacity-50 cursor-not-allowed',
                                                                                         )}
-                                                                                </div>
-                                                                        </TableCell>
-                                                                        <TableCell>
-                                                                                <div className="flex items-center justify-center">
-                                                                                        <Flame className="h-4 w-4 text-orange-500 mr-1" />
-                                                                                        <span className="font-medium">
-                                                                                                {user.streakCount}
-                                                                                        </span>
-                                                                                </div>
-                                                                        </TableCell>
-                                                                        <TableCell className="text-center">
-                                                                                <Badge variant="secondary">
-                                                                                        {user.moodLogCount} logs
-                                                                                </Badge>
-                                                                        </TableCell>
-                                                                        <TableCell className="text-center">
-                                                                                {user.lastMoodLog ? (
-                                                                                        <div className="text-sm text-muted-foreground">
+                                                                                >
+                                                                                        <Trash2 className="h-3 w-3 mr-1" />
+                                                                                        {deletingUsers.has(user._id)
+                                                                                                ? 'Deleting...'
+                                                                                                : 'Delete'}
+                                                                                </Button>
+                                                                        }
+                                                                />
+                                                        </div>
+                                                </Card>
+                                        ))}
+                                </div>
+                        </div>
+
+                        {/* Users Table - Desktop View */}
+                        <div className="hidden md:block">
+                                <Card>
+                                        <CardHeader>
+                                                <CardTitle>Users ({usersData?.totalUsers || 0})</CardTitle>
+                                                <CardDescription>
+                                                        All registered users and their activity
+                                                </CardDescription>
+                                        </CardHeader>
+                                        <CardContent>
+                                                <Table>
+                                                        <TableHeader>
+                                                                <TableRow>
+                                                                        <TableHead>User</TableHead>
+                                                                        <TableHead>Provider</TableHead>
+                                                                        <TableHead className="text-center">
+                                                                                Role
+                                                                        </TableHead>
+                                                                        <TableHead className="text-center">
+                                                                                Joined
+                                                                        </TableHead>
+                                                                        <TableHead className="text-center">
+                                                                                Streak
+                                                                        </TableHead>
+                                                                        <TableHead className="text-center">
+                                                                                Mood Logs
+                                                                        </TableHead>
+                                                                        <TableHead className="text-center">
+                                                                                Last Active
+                                                                        </TableHead>
+                                                                        <TableHead className="text-center">
+                                                                                Actions
+                                                                        </TableHead>
+                                                                </TableRow>
+                                                        </TableHeader>
+                                                        <TableBody>
+                                                                {usersData?.users.map((user) => (
+                                                                        <TableRow key={user._id}>
+                                                                                <TableCell>
+                                                                                        <div>
+                                                                                                <div className="font-medium">
+                                                                                                        {user.name ||
+                                                                                                                'Anonymous'}
+                                                                                                </div>
+                                                                                                <div className="text-sm text-muted-foreground">
+                                                                                                        {user.email}
+                                                                                                </div>
+                                                                                        </div>
+                                                                                </TableCell>
+                                                                                <TableCell>
+                                                                                        <Badge
+                                                                                                variant="outline"
+                                                                                                className="capitalize"
+                                                                                        >
+                                                                                                {user.provider}
+                                                                                        </Badge>
+                                                                                </TableCell>
+                                                                                <TableCell className="text-center">
+                                                                                        <Badge
+                                                                                                variant={
+                                                                                                        user.role ===
+                                                                                                        'admin'
+                                                                                                                ? 'default'
+                                                                                                                : 'secondary'
+                                                                                                }
+                                                                                                className="capitalize"
+                                                                                        >
+                                                                                                {user.role}
+                                                                                        </Badge>
+                                                                                </TableCell>
+                                                                                <TableCell>
+                                                                                        <div className="flex items-center justify-center text-sm text-muted-foreground">
+                                                                                                <Calendar className="h-3 w-3 mr-1" />
                                                                                                 {format(
                                                                                                         new Date(
-                                                                                                                user.lastMoodLog,
+                                                                                                                user.createdAt,
                                                                                                         ),
                                                                                                         'MMM d, yyyy',
                                                                                                 )}
                                                                                         </div>
-                                                                                ) : (
-                                                                                        <span className="text-sm text-muted-foreground">
-                                                                                                Never
-                                                                                        </span>
-                                                                                )}
-                                                                        </TableCell>
-                                                                        <TableCell>
-                                                                                <div className="flex gap-2 items-center justify-center">
-                                                                                        <Button
-                                                                                                variant="outline"
-                                                                                                size="sm"
-                                                                                                onClick={() =>
-                                                                                                        handleUpdateUser(
-                                                                                                                user._id,
-                                                                                                        )
-                                                                                                }
-                                                                                                disabled={updatingUsers.has(
-                                                                                                        user._id,
-                                                                                                )}
-                                                                                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                                                                        >
-                                                                                                <Edit className="h-4 w-4 mr-1" />
-                                                                                                {updatingUsers.has(
-                                                                                                        user._id,
-                                                                                                )
-                                                                                                        ? 'Updating...'
-                                                                                                        : 'Edit'}
-                                                                                        </Button>
-                                                                                        <DeleteDialog
-                                                                                                title="Delete User"
-                                                                                                description={`Are you sure you want to delete ${
-                                                                                                        user.role
-                                                                                                } "${
-                                                                                                        user.name ||
-                                                                                                        user.email
-                                                                                                }"? This action cannot be undone and will also delete all their mood logs.`}
-                                                                                                onDelete={() =>
-                                                                                                        handleDeleteUser(
-                                                                                                                user._id,
-                                                                                                        )
-                                                                                                }
-                                                                                                trigger={
-                                                                                                        <Button
-                                                                                                                variant="outline"
-                                                                                                                size="sm"
-                                                                                                                disabled={
-                                                                                                                        deletingUsers.has(
-                                                                                                                                user._id,
-                                                                                                                        ) ||
-                                                                                                                        user.role ===
-                                                                                                                                'admin'
-                                                                                                                }
-                                                                                                                className={cn(
-                                                                                                                        'text-red-600 hover:text-red-700 hover:bg-red-50',
-                                                                                                                        user.role ===
-                                                                                                                                'admin' &&
-                                                                                                                                'opacity-50 cursor-not-allowed',
-                                                                                                                )}
-                                                                                                        >
-                                                                                                                <Trash2 className="h-4 w-4 mr-1" />
-                                                                                                                {deletingUsers.has(
+                                                                                </TableCell>
+                                                                                <TableCell>
+                                                                                        <div className="flex items-center justify-center">
+                                                                                                <Flame className="h-4 w-4 text-orange-500 mr-1" />
+                                                                                                <span className="font-medium">
+                                                                                                        {
+                                                                                                                user.streakCount
+                                                                                                        }
+                                                                                                </span>
+                                                                                        </div>
+                                                                                </TableCell>
+                                                                                <TableCell className="text-center">
+                                                                                        <Badge variant="secondary">
+                                                                                                {user.moodLogCount} logs
+                                                                                        </Badge>
+                                                                                </TableCell>
+                                                                                <TableCell className="text-center">
+                                                                                        {user.lastMoodLog ? (
+                                                                                                <div className="text-sm text-muted-foreground">
+                                                                                                        {format(
+                                                                                                                new Date(
+                                                                                                                        user.lastMoodLog,
+                                                                                                                ),
+                                                                                                                'MMM d, yyyy',
+                                                                                                        )}
+                                                                                                </div>
+                                                                                        ) : (
+                                                                                                <span className="text-sm text-muted-foreground">
+                                                                                                        Never
+                                                                                                </span>
+                                                                                        )}
+                                                                                </TableCell>
+                                                                                <TableCell>
+                                                                                        <div className="flex gap-2 items-center justify-center">
+                                                                                                <Button
+                                                                                                        variant="outline"
+                                                                                                        size="sm"
+                                                                                                        onClick={() =>
+                                                                                                                handleUpdateUser(
                                                                                                                         user._id,
                                                                                                                 )
-                                                                                                                        ? 'Deleting...'
-                                                                                                                        : 'Delete'}
-                                                                                                        </Button>
-                                                                                                }
-                                                                                        />
-                                                                                </div>
-                                                                        </TableCell>
-                                                                </TableRow>
-                                                        ))}
-                                                </TableBody>
-                                        </Table>
+                                                                                                        }
+                                                                                                        disabled={updatingUsers.has(
+                                                                                                                user._id,
+                                                                                                        )}
+                                                                                                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                                                                >
+                                                                                                        <Edit className="h-4 w-4 mr-1" />
+                                                                                                        {updatingUsers.has(
+                                                                                                                user._id,
+                                                                                                        )
+                                                                                                                ? 'Updating...'
+                                                                                                                : 'Edit'}
+                                                                                                </Button>
+                                                                                                <DeleteDialog
+                                                                                                        title="Delete User"
+                                                                                                        description={`Are you sure you want to delete ${
+                                                                                                                user.role
+                                                                                                        } "${
+                                                                                                                user.name ||
+                                                                                                                user.email
+                                                                                                        }"? This action cannot be undone and will also delete all their mood logs.`}
+                                                                                                        onDelete={() =>
+                                                                                                                handleDeleteUser(
+                                                                                                                        user._id,
+                                                                                                                )
+                                                                                                        }
+                                                                                                        trigger={
+                                                                                                                <Button
+                                                                                                                        variant="outline"
+                                                                                                                        size="sm"
+                                                                                                                        disabled={
+                                                                                                                                deletingUsers.has(
+                                                                                                                                        user._id,
+                                                                                                                                ) ||
+                                                                                                                                user.role ===
+                                                                                                                                        'admin'
+                                                                                                                        }
+                                                                                                                        className={cn(
+                                                                                                                                'text-red-600 hover:text-red-700 hover:bg-red-50',
+                                                                                                                                user.role ===
+                                                                                                                                        'admin' &&
+                                                                                                                                        'opacity-50 cursor-not-allowed',
+                                                                                                                        )}
+                                                                                                                >
+                                                                                                                        <Trash2 className="h-4 w-4 mr-1" />
+                                                                                                                        {deletingUsers.has(
+                                                                                                                                user._id,
+                                                                                                                        )
+                                                                                                                                ? 'Deleting...'
+                                                                                                                                : 'Delete'}
+                                                                                                                </Button>
+                                                                                                        }
+                                                                                                />
+                                                                                        </div>
+                                                                                </TableCell>
+                                                                        </TableRow>
+                                                                ))}
+                                                        </TableBody>
+                                                </Table>
 
-                                        {/* Pagination */}
-                                        {usersData && usersData.totalPages > 1 && (
-                                                <div className="flex items-center justify-between mt-6">
-                                                        <div className="text-sm text-muted-foreground">
-                                                                Page {usersData.currentPage} of {usersData.totalPages}
+                                                {/* Pagination */}
+                                                {usersData && usersData.totalPages > 1 && (
+                                                        <div className="flex items-center justify-between mt-6">
+                                                                <div className="text-sm text-muted-foreground">
+                                                                        Page {usersData.currentPage} of{' '}
+                                                                        {usersData.totalPages}
+                                                                </div>
+                                                                <div className="flex gap-2">
+                                                                        <Button
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                onClick={() =>
+                                                                                        setCurrentPage(
+                                                                                                Math.max(
+                                                                                                        1,
+                                                                                                        currentPage - 1,
+                                                                                                ),
+                                                                                        )
+                                                                                }
+                                                                                disabled={currentPage === 1}
+                                                                        >
+                                                                                Previous
+                                                                        </Button>
+                                                                        <Button
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                onClick={() =>
+                                                                                        setCurrentPage(
+                                                                                                Math.min(
+                                                                                                        usersData.totalPages,
+                                                                                                        currentPage + 1,
+                                                                                                ),
+                                                                                        )
+                                                                                }
+                                                                                disabled={
+                                                                                        currentPage ===
+                                                                                        usersData.totalPages
+                                                                                }
+                                                                        >
+                                                                                Next
+                                                                        </Button>
+                                                                </div>
                                                         </div>
-                                                        <div className="flex gap-2">
-                                                                <Button
-                                                                        variant="outline"
-                                                                        size="sm"
-                                                                        onClick={() =>
-                                                                                setCurrentPage(
-                                                                                        Math.max(1, currentPage - 1),
-                                                                                )
-                                                                        }
-                                                                        disabled={currentPage === 1}
-                                                                >
-                                                                        Previous
-                                                                </Button>
-                                                                <Button
-                                                                        variant="outline"
-                                                                        size="sm"
-                                                                        onClick={() =>
-                                                                                setCurrentPage(
-                                                                                        Math.min(
-                                                                                                usersData.totalPages,
-                                                                                                currentPage + 1,
-                                                                                        ),
-                                                                                )
-                                                                        }
-                                                                        disabled={currentPage === usersData.totalPages}
-                                                                >
-                                                                        Next
-                                                                </Button>
-                                                        </div>
-                                                </div>
-                                        )}
-                                </CardContent>
-                        </Card>
+                                                )}
+                                        </CardContent>
+                                </Card>
+                        </div>
 
                         {/* Update User Dialog */}
                         <Dialog
