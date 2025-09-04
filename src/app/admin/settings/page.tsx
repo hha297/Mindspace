@@ -81,9 +81,12 @@ export default function AdminSettingsPage() {
         });
         const [isLoading, setIsLoading] = useState(false);
         const [isSaving, setIsSaving] = useState(false);
+        const [currentDate, setCurrentDate] = useState('');
 
         useEffect(() => {
                 loadSettings();
+                // Set current date on client side to prevent hydration mismatch
+                setCurrentDate(new Date().toLocaleDateString());
         }, []);
 
         const loadSettings = async () => {
@@ -147,7 +150,7 @@ export default function AdminSettingsPage() {
                         <main className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
                                 {/* Header */}
                                 <div className="mb-8">
-                                        <div className="flex items-center justify-between">
+                                        <div className="flex items-center  flex-col md:flex-row justify-between">
                                                 <div>
                                                         <h1 className="text-3xl font-bold text-foreground mb-2">
                                                                 System Settings
@@ -156,7 +159,7 @@ export default function AdminSettingsPage() {
                                                                 Configure platform settings and preferences
                                                         </p>
                                                 </div>
-                                                <div className="flex gap-2">
+                                                <div className="flex gap-2 mt-4">
                                                         <Button variant="outline" onClick={resetSettings}>
                                                                 <RefreshCw className="h-4 w-4 mr-2" />
                                                                 Reset
@@ -669,7 +672,7 @@ export default function AdminSettingsPage() {
                                                                 <div className="space-y-1">
                                                                         <Label>Last Backup</Label>
                                                                         <p className="text-sm text-muted-foreground">
-                                                                                {new Date().toLocaleDateString()}
+                                                                                {currentDate || 'Loading...'}
                                                                         </p>
                                                                 </div>
                                                                 <div className="space-y-1">
