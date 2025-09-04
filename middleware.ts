@@ -16,7 +16,9 @@ export function middleware(request: NextRequest) {
 
         // Check if authenticated user is trying to access sign-in or sign-up pages
         if (token && (request.nextUrl.pathname === '/sign-in' || request.nextUrl.pathname === '/sign-up')) {
-                return NextResponse.redirect(new URL('/', request.url));
+                const redirectUrl = new URL('/', request.url);
+                redirectUrl.searchParams.set('message', 'already-signed-in');
+                return NextResponse.redirect(redirectUrl);
         }
 
         return NextResponse.next();

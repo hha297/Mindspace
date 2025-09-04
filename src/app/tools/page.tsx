@@ -26,19 +26,31 @@ export default function ToolsPage() {
 
                                 <Tabs defaultValue="breathing" className="space-y-8">
                                         <TabsList className="grid w-full grid-cols-4">
-                                                <TabsTrigger value="breathing" className="flex items-center space-x-2">
+                                                <TabsTrigger
+                                                        value="breathing"
+                                                        className="flex items-center space-x-2  cursor-pointer"
+                                                >
                                                         <Activity className="h-4 w-4" />
                                                         <span className="hidden sm:inline">Breathing</span>
                                                 </TabsTrigger>
-                                                <TabsTrigger value="journaling" className="flex items-center space-x-2">
+                                                <TabsTrigger
+                                                        value="journaling"
+                                                        className="flex items-center space-x-2 cursor-pointer"
+                                                >
                                                         <PenTool className="h-4 w-4" />
                                                         <span className="hidden sm:inline">Journaling</span>
                                                 </TabsTrigger>
-                                                <TabsTrigger value="assessment" className="flex items-center space-x-2">
+                                                <TabsTrigger
+                                                        value="assessment"
+                                                        className="flex items-center space-x-2 cursor-pointer"
+                                                >
                                                         <ClipboardList className="h-4 w-4" />
                                                         <span className="hidden sm:inline">Assessment</span>
                                                 </TabsTrigger>
-                                                <TabsTrigger value="more" className="flex items-center space-x-2">
+                                                <TabsTrigger
+                                                        value="more"
+                                                        className="flex items-center space-x-2 cursor-pointer"
+                                                >
                                                         <Heart className="h-4 w-4" />
                                                         <span className="hidden sm:inline">More Tools</span>
                                                 </TabsTrigger>

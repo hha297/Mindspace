@@ -23,6 +23,7 @@ import { Search, Users, Calendar, Flame, Heart, Trash2, Edit } from 'lucide-reac
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { DeleteDialog } from '@/components/delete-dialog';
 
 interface User {
         _id: string;
@@ -52,11 +53,6 @@ export default function AdminUsersPage() {
         const [deletingUsers, setDeletingUsers] = useState<Set<string>>(new Set());
         const [updatingUsers, setUpdatingUsers] = useState<Set<string>>(new Set());
 
-        // Dialog states
-        const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; user: User | null }>({
-                open: false,
-                user: null,
-        });
         const [updateDialog, setUpdateDialog] = useState<{ open: boolean; user: User | null; newRole: string }>({
                 open: false,
                 user: null,
@@ -95,34 +91,26 @@ export default function AdminUsersPage() {
         };
 
         const handleDeleteUser = async (userId: string, userName: string, userRole: string) => {
-                setDeleteDialog({ open: true, user: usersData?.users.find((u) => u._id === userId) || null });
-        };
-
-        const confirmDeleteUser = async () => {
-                if (!deleteDialog.user) return;
-
-                const { user } = deleteDialog;
-                setDeletingUsers((prev) => new Set(prev).add(user._id));
                 try {
-                        const response = await fetch(`/api/admin/users?id=${user._id}`, {
+                        setDeletingUsers((prev) => new Set(prev).add(userId));
+                        const response = await fetch(`/api/admin/users/${userId}`, {
                                 method: 'DELETE',
                         });
 
                         if (response.ok) {
-                                toast.success(`${user.role} "${user.name || user.email}" deleted successfully`);
+                                toast.success('User deleted successfully');
                                 fetchUsers(); // Refresh the list
-                                setDeleteDialog({ open: false, user: null });
                         } else {
                                 const error = await response.json();
-                                toast.error(error.error || 'Failed to delete user');
+                                toast.error(error.message || 'Failed to delete user');
                         }
                 } catch (error) {
-                        console.error('Failed to delete user:', error);
+                        console.error('Error deleting user:', error);
                         toast.error('Failed to delete user');
                 } finally {
                         setDeletingUsers((prev) => {
                                 const newSet = new Set(prev);
-                                newSet.delete(user._id);
+                                newSet.delete(userId);
                                 return newSet;
                         });
                 }
@@ -376,10 +364,15 @@ export default function AdminUsersPage() {
                                                                                                         ? 'Updating...'
                                                                                                         : 'Edit'}
                                                                                         </Button>
-                                                                                        <Button
-                                                                                                variant="outline"
-                                                                                                size="sm"
-                                                                                                onClick={() =>
+                                                                                        <DeleteDialog
+                                                                                                title="Delete User"
+                                                                                                description={`Are you sure you want to delete ${
+                                                                                                        user.role
+                                                                                                } "${
+                                                                                                        user.name ||
+                                                                                                        user.email
+                                                                                                }"? This action cannot be undone and will also delete all their mood logs.`}
+                                                                                                onDelete={() =>
                                                                                                         handleDeleteUser(
                                                                                                                 user._id,
                                                                                                                 user.name ||
@@ -387,27 +380,33 @@ export default function AdminUsersPage() {
                                                                                                                 user.role,
                                                                                                         )
                                                                                                 }
-                                                                                                disabled={
-                                                                                                        deletingUsers.has(
-                                                                                                                user._id,
-                                                                                                        ) ||
-                                                                                                        user.role ===
-                                                                                                                'admin'
+                                                                                                trigger={
+                                                                                                        <Button
+                                                                                                                variant="outline"
+                                                                                                                size="sm"
+                                                                                                                disabled={
+                                                                                                                        deletingUsers.has(
+                                                                                                                                user._id,
+                                                                                                                        ) ||
+                                                                                                                        user.role ===
+                                                                                                                                'admin'
+                                                                                                                }
+                                                                                                                className={cn(
+                                                                                                                        'text-red-600 hover:text-red-700 hover:bg-red-50',
+                                                                                                                        user.role ===
+                                                                                                                                'admin' &&
+                                                                                                                                'opacity-50 cursor-not-allowed',
+                                                                                                                )}
+                                                                                                        >
+                                                                                                                <Trash2 className="h-4 w-4 mr-1" />
+                                                                                                                {deletingUsers.has(
+                                                                                                                        user._id,
+                                                                                                                )
+                                                                                                                        ? 'Deleting...'
+                                                                                                                        : 'Delete'}
+                                                                                                        </Button>
                                                                                                 }
-                                                                                                className={cn(
-                                                                                                        'text-red-600 hover:text-red-700 hover:bg-red-50',
-                                                                                                        user.role ===
-                                                                                                                'admin' &&
-                                                                                                                'opacity-50 cursor-not-allowed',
-                                                                                                )}
-                                                                                        >
-                                                                                                <Trash2 className="h-4 w-4 mr-1" />
-                                                                                                {deletingUsers.has(
-                                                                                                        user._id,
-                                                                                                )
-                                                                                                        ? 'Deleting...'
-                                                                                                        : 'Delete'}
-                                                                                        </Button>
+                                                                                        />
                                                                                 </div>
                                                                         </TableCell>
                                                                 </TableRow>
@@ -454,38 +453,6 @@ export default function AdminUsersPage() {
                                         )}
                                 </CardContent>
                         </Card>
-
-                        {/* Delete Confirmation Dialog */}
-                        <Dialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ open, user: null })}>
-                                <DialogContent>
-                                        <DialogHeader>
-                                                <DialogTitle>Delete User</DialogTitle>
-                                                <DialogDescription>
-                                                        Are you sure you want to delete {deleteDialog.user?.role} &quot;
-                                                        {deleteDialog.user?.name || deleteDialog.user?.email}&quot;?
-                                                        This action cannot be undone and will also delete all their mood
-                                                        logs.
-                                                </DialogDescription>
-                                        </DialogHeader>
-                                        <DialogFooter>
-                                                <Button
-                                                        variant="outline"
-                                                        onClick={() => setDeleteDialog({ open: false, user: null })}
-                                                >
-                                                        Cancel
-                                                </Button>
-                                                <Button
-                                                        variant="destructive"
-                                                        onClick={confirmDeleteUser}
-                                                        disabled={deletingUsers.has(deleteDialog.user?._id || '')}
-                                                >
-                                                        {deletingUsers.has(deleteDialog.user?._id || '')
-                                                                ? 'Deleting...'
-                                                                : 'Delete User'}
-                                                </Button>
-                                        </DialogFooter>
-                                </DialogContent>
-                        </Dialog>
 
                         {/* Update User Dialog */}
                         <Dialog

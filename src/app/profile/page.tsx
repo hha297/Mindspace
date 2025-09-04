@@ -41,6 +41,15 @@ export default function ProfilePage() {
                 newPassword: '',
                 confirmPassword: '',
         });
+        const getButtonStyle = () => {
+                if (session) {
+                        return {
+                                cursor: 'not-allowed',
+                                opacity: 0.6,
+                        } as React.CSSProperties;
+                }
+                return {};
+        };
         const [showPasswords, setShowPasswords] = useState({
                 current: false,
                 new: false,
@@ -334,7 +343,7 @@ export default function ProfilePage() {
                                                 </CardHeader>
                                                 <CardContent className="space-y-4">
                                                         <div className="grid md:grid-cols-2 gap-4">
-                                                                <div className="space-y-2">
+                                                                <div className="space-y-2 cursor-not-allowed">
                                                                         <Label htmlFor="name">Full Name</Label>
                                                                         <Input
                                                                                 id="name"
@@ -363,7 +372,7 @@ export default function ProfilePage() {
                                                                                 </p>
                                                                         )}
                                                                 </div>
-                                                                <div className="space-y-2">
+                                                                <div className="space-y-2 cursor-not-allowed">
                                                                         <Label htmlFor="email">Email Address</Label>
                                                                         <Input
                                                                                 id="email"

@@ -1,11 +1,40 @@
+'use client';
+
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmergencyBanner } from '@/components/emergency-banner';
 import { Navbar } from '@/components/navbar';
 import { Heart, BarChart3, BookOpen, Users, Shield, Sparkles } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function HomePage() {
+        const searchParams = useSearchParams();
+        const { data: session } = useSession();
+
+        useEffect(() => {
+                const message = searchParams.get('message');
+                if (message === 'already-signed-in') {
+                        toast.info('You are already signed in!', {
+                                description: 'Welcome back to MindSpace.',
+                        });
+                }
+        }, [searchParams]);
+
+        const handleSignUpClick = (e: React.MouseEvent) => {
+                if (session) {
+                        e.preventDefault();
+                        toast.info('You are already signed in!', {
+                                description: 'Welcome back to MindSpace.',
+                        });
+                        return;
+                }
+                // If not signed in, allow normal navigation to sign-up page
+        };
+
         const features = [
                 {
                         icon: BarChart3,
@@ -68,7 +97,12 @@ export default function HomePage() {
                                                         </p>
                                                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                                                 <Button size="lg" asChild>
-                                                                        <Link href="/dashboard">Get Started</Link>
+                                                                        <Link
+                                                                                href="/dashboard"
+                                                                                onClick={handleSignUpClick}
+                                                                        >
+                                                                                Get Started
+                                                                        </Link>
                                                                 </Button>
                                                                 <Button size="lg" variant="outline" asChild>
                                                                         <Link href="/resources">Explore Resources</Link>
@@ -95,8 +129,14 @@ export default function HomePage() {
                                                                                         Try our 5-minute breathing
                                                                                         exercise to help calm your mind.
                                                                                 </p>
-                                                                                <Button variant="outline" size="sm">
-                                                                                        Start Breathing Exercise
+                                                                                <Button
+                                                                                        variant="outline"
+                                                                                        size="sm"
+                                                                                        asChild
+                                                                                >
+                                                                                        <Link href="/tools">
+                                                                                                Start Breathing Exercise
+                                                                                        </Link>
                                                                                 </Button>
                                                                         </CardContent>
                                                                 </Card>
@@ -112,8 +152,14 @@ export default function HomePage() {
                                                                                         Connect with trained counselors
                                                                                         who understand student life.
                                                                                 </p>
-                                                                                <Button variant="outline" size="sm">
-                                                                                        Find Support
+                                                                                <Button
+                                                                                        variant="outline"
+                                                                                        size="sm"
+                                                                                        asChild
+                                                                                >
+                                                                                        <Link href="/resources">
+                                                                                                Find Support
+                                                                                        </Link>
                                                                                 </Button>
                                                                         </CardContent>
                                                                 </Card>
@@ -190,7 +236,9 @@ export default function HomePage() {
                                                                 their mental health with MindSpace.
                                                         </p>
                                                         <Button size="lg" asChild>
-                                                                <Link href="/sign-in">Sign Up Free</Link>
+                                                                <Link href="/sign-up" onClick={handleSignUpClick}>
+                                                                        Sign Up Free
+                                                                </Link>
                                                         </Button>
                                                 </div>
                                         </div>
