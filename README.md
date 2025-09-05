@@ -6,6 +6,20 @@
 
 </div>
 
+## 📋 Table of Contents
+
+- [📖 About MindSpace](#-about-mindspace)
+- [🚀 Key Features](#-key-features)
+- [✨ Features](#-features)
+- [🛠 Tech Stack](#-tech-stack)
+- [🔑 Environment Variables](#-environment-variables)
+- [🚀 Getting Started](#-getting-started)
+- [📦 Deployment](#-deployment)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+
+---
+
 ## 📖 About MindSpace
 
 **MindSpace** is a comprehensive mental health platform specifically designed for students and young adults. We understand the unique pressures and challenges that come with academic life, and we're here to provide the support you need to thrive both mentally and academically.
@@ -67,20 +81,6 @@ We believe that mental health support should be accessible, personalized, and st
 - HIPAA-compliant data handling
 - Complete user control over data sharing
 - Anonymous usage options available
-
----
-
-## 📋 Table of Contents
-
-- [📖 About MindSpace](#-about-mindspace)
-- [🚀 Key Features](#-key-features)
-- [✨ Features](#-features)
-- [🛠 Tech Stack](#-tech-stack)
-- [🔑 Environment Variables](#-environment-variables)
-- [🚀 Getting Started](#-getting-started)
-- [📦 Deployment](#-deployment)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
 
 ---
 
