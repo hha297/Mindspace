@@ -84,7 +84,7 @@ export default function ResourceDetailPage() {
                 return (
                         <div className="min-h-screen bg-background">
                                 <Navbar />
-                                <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                                <main className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                                         <EmergencyBanner />
                                         <div className="mb-8">
                                                 <Skeleton className="h-8 w-64 mb-4" />
@@ -110,7 +110,7 @@ export default function ResourceDetailPage() {
                 return (
                         <div className="min-h-screen bg-background">
                                 <Navbar />
-                                <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                                <main className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                                         <EmergencyBanner />
                                         <div className="text-center py-12">
                                                 <h1 className="text-2xl font-bold text-foreground mb-4">
@@ -135,7 +135,7 @@ export default function ResourceDetailPage() {
         return (
                 <div className="min-h-screen bg-background">
                         <Navbar />
-                        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <main className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                                 <EmergencyBanner />
 
                                 {/* Back Button */}
@@ -269,27 +269,6 @@ export default function ResourceDetailPage() {
                                                 </CardContent>
                                         </Card>
                                 )}
-
-                                {/* Action Buttons */}
-                                <div className="flex flex-col sm:flex-row gap-4">
-                                        <Button
-                                                variant="outline"
-                                                onClick={() => window.history.back()}
-                                                className="flex-1"
-                                        >
-                                                <ArrowLeft className="h-4 w-4 mr-2" />
-                                                Back to Resources
-                                        </Button>
-                                        {resource.url && (
-                                                <Button
-                                                        onClick={() => window.open(resource.url, '_blank')}
-                                                        className="flex-1"
-                                                >
-                                                        <ExternalLink className="h-4 w-4 mr-2" />
-                                                        Access Resource
-                                                </Button>
-                                        )}
-                                </div>
                         </main>
                 </div>
         );
