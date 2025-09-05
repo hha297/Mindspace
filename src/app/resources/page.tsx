@@ -36,6 +36,7 @@ export default function ResourcesPage() {
 
         const [totalPages, setTotalPages] = useState(1);
         const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+        const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
         const itemsPerPage = 4;
 
         useEffect(() => {
@@ -59,8 +60,8 @@ export default function ResourcesPage() {
                                 setResources(allData.resources || []);
                                 setFeaturedResources(featuredData.resources || []);
 
-                                // Calculate total pages for pagination
-                                const totalItems = featuredData.resources?.length || 0;
+                                // Calculate total pages for pagination (use all resources for pagination)
+                                const totalItems = allData.resources?.length || 0;
                                 setTotalPages(Math.ceil(totalItems / itemsPerPage));
 
                                 // Calculate categories with counts
@@ -93,6 +94,27 @@ export default function ResourcesPage() {
                 setSelectedCategory(category);
         };
 
+        const handleFeaturedToggle = () => {
+                setShowFeaturedOnly(!showFeaturedOnly);
+        };
+
+        // Filter resources based on selected category and featured status
+        const getFilteredResources = () => {
+                let filtered = resources;
+
+                // Filter by featured status
+                if (showFeaturedOnly) {
+                        filtered = filtered.filter((resource) => resource.featured);
+                }
+
+                // Filter by category
+                if (selectedCategory) {
+                        filtered = filtered.filter((resource) => resource.category === selectedCategory);
+                }
+
+                return filtered;
+        };
+
         return (
                 <div className="min-h-screen bg-background">
                         <Navbar />
@@ -107,11 +129,14 @@ export default function ResourcesPage() {
                                         categories={categories}
                                         selectedCategory={selectedCategory}
                                         onCategorySelect={handleCategorySelect}
+                                        showFeaturedOnly={showFeaturedOnly}
+                                        onFeaturedToggle={handleFeaturedToggle}
+                                        featuredCount={resources.filter((resource) => resource.featured).length}
                                 />
 
                                 {/* Resources Grid */}
                                 <ResourcesGrid
-                                        resources={featuredResources}
+                                        resources={getFilteredResources()}
                                         isLoading={isLoading}
                                         selectedCategory={selectedCategory}
                                 />

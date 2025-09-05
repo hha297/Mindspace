@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -28,6 +29,7 @@ export default function SignUpPage() {
         const [image, setImage] = useState('');
         const [isLoading, setIsLoading] = useState(false);
         const [isUploading, setIsUploading] = useState(false);
+        const [agreeToTerms, setAgreeToTerms] = useState(false);
         const fileInputRef = useRef<HTMLInputElement>(null);
         const router = useRouter();
         const { status } = useSession();
@@ -42,10 +44,18 @@ export default function SignUpPage() {
         // Show loading while checking authentication
         if (status === 'loading') {
                 return (
-                        <div className="min-h-screen bg-background flex items-center justify-center">
+                        <div
+                                className="min-h-screen flex items-center justify-center"
+                                style={{
+                                        backgroundImage: 'url(/wallpaper/wallpaper1.jpg)',
+                                        backgroundSize: 'cover',
+                                        backgroundPosition: 'center',
+                                        backgroundRepeat: 'no-repeat',
+                                }}
+                        >
                                 <div className="text-center">
                                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                                        <p className="text-muted-foreground">Loading...</p>
+                                        <p className="text-white">Loading...</p>
                                 </div>
                         </div>
                 );
@@ -107,6 +117,13 @@ export default function SignUpPage() {
                 if (password.length < 6) {
                         toast.error('Password too short', {
                                 description: 'Password must be at least 6 characters long.',
+                        });
+                        return;
+                }
+
+                if (!agreeToTerms) {
+                        toast.error('Terms agreement required', {
+                                description: 'Please agree to the Terms of Service and Privacy Policy.',
                         });
                         return;
                 }
@@ -197,13 +214,21 @@ export default function SignUpPage() {
         };
 
         return (
-                <div className="min-h-screen p-8 bg-background flex flex-col">
-                        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-                                <div className="max-w-md w-full space-y-8">
+                <div
+                        className="min-h-screen p-4 sm:p-8 flex flex-col"
+                        style={{
+                                backgroundImage: 'url(/wallpaper/wallpaper1.jpg)',
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                backgroundRepeat: 'no-repeat',
+                        }}
+                >
+                        <div className="flex-1 flex items-center justify-center sm:px-6 lg:px-8">
+                                <div className="max-w-md w-full space-y-6 sm:space-y-8">
                                         <div className="text-center">
                                                 <Link href="/" className="inline-flex items-center space-x-2 mb-8">
                                                         <Image src="/logo.png" alt="MindSpace" width={32} height={32} />
-                                                        <span className="font-semibold text-2xl text-foreground">
+                                                        <span className="font-semibold text-2xl text-white">
                                                                 MindSpace
                                                         </span>
                                                 </Link>
@@ -430,9 +455,44 @@ export default function SignUpPage() {
                                                                                 </Button>
                                                                         </div>
                                                                 </div>
+                                                                <div className="flex items-center space-x-2">
+                                                                        <Checkbox
+                                                                                id="terms"
+                                                                                checked={agreeToTerms}
+                                                                                onCheckedChange={(checked) =>
+                                                                                        setAgreeToTerms(
+                                                                                                checked as boolean,
+                                                                                        )
+                                                                                }
+                                                                                className="bg-white border-primary/50 mt-1"
+                                                                        />
+                                                                        <Label
+                                                                                htmlFor="terms"
+                                                                                className="text-sm text-muted-foreground leading-relaxed flex-1"
+                                                                        >
+                                                                                <div className="space-y-1 ml-1">
+                                                                                        By signing up, I agree to the{' '}
+                                                                                        <Link
+                                                                                                href="/terms"
+                                                                                                className="text-primary hover:underline"
+                                                                                                target="_blank"
+                                                                                        >
+                                                                                                Terms of Service{' '}
+                                                                                        </Link>
+                                                                                        and{' '}
+                                                                                        <Link
+                                                                                                href="/privacy"
+                                                                                                className="text-primary hover:underline"
+                                                                                                target="_blank"
+                                                                                        >
+                                                                                                Privacy Policy
+                                                                                        </Link>
+                                                                                </div>
+                                                                        </Label>
+                                                                </div>
                                                                 <Button
                                                                         type="submit"
-                                                                        disabled={isLoading}
+                                                                        disabled={isLoading || !agreeToTerms}
                                                                         className="w-full"
                                                                 >
                                                                         <UserPlus className="mr-2 h-4 w-4" />
@@ -455,19 +515,6 @@ export default function SignUpPage() {
                                                         </div>
                                                 </CardContent>
                                         </Card>
-
-                                        <div className="text-center text-xs text-muted-foreground">
-                                                <p>
-                                                        By creating an account, you agree to our{' '}
-                                                        <Link href="/privacy" className="text-primary hover:underline">
-                                                                Privacy Policy
-                                                        </Link>{' '}
-                                                        and{' '}
-                                                        <Link href="/terms" className="text-primary hover:underline">
-                                                                Terms of Service
-                                                        </Link>
-                                                </p>
-                                        </div>
                                 </div>
                         </div>
                 </div>

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
         Calendar,
         TrendingUp,
@@ -272,36 +273,48 @@ export function MoodHistory() {
                                                         <div className="flex flex-col sm:flex-row items-start sm:items-center  gap-2">
                                                                 <Label className="text-sm">Sort by:</Label>
                                                                 <div className="flex gap-2">
-                                                                        <select
+                                                                        <Select
                                                                                 value={sortBy}
-                                                                                onChange={(e) => {
-                                                                                        setSortBy(
-                                                                                                e.target.value as
-                                                                                                        | 'date'
-                                                                                                        | 'mood',
-                                                                                        );
+                                                                                onValueChange={(
+                                                                                        value: 'date' | 'mood',
+                                                                                ) => {
+                                                                                        setSortBy(value);
                                                                                         setCurrentPage(1);
                                                                                 }}
-                                                                                className="text-sm border rounded px-2 py-1 bg-white "
                                                                         >
-                                                                                <option value="date">Date</option>
-                                                                                <option value="mood">Mood Score</option>
-                                                                        </select>
-                                                                        <select
+                                                                                <SelectTrigger className="w-[120px] bg-white border border-primary/50">
+                                                                                        <SelectValue placeholder="Sort by" />
+                                                                                </SelectTrigger>
+                                                                                <SelectContent>
+                                                                                        <SelectItem value="date">
+                                                                                                Date
+                                                                                        </SelectItem>
+                                                                                        <SelectItem value="mood">
+                                                                                                Mood Score
+                                                                                        </SelectItem>
+                                                                                </SelectContent>
+                                                                        </Select>
+                                                                        <Select
                                                                                 value={sortOrder}
-                                                                                onChange={(e) => {
-                                                                                        setSortOrder(
-                                                                                                e.target.value as
-                                                                                                        | 'asc'
-                                                                                                        | 'desc',
-                                                                                        );
+                                                                                onValueChange={(
+                                                                                        value: 'asc' | 'desc',
+                                                                                ) => {
+                                                                                        setSortOrder(value);
                                                                                         setCurrentPage(1);
                                                                                 }}
-                                                                                className="text-sm border rounded px-2 py-1 bg-white"
                                                                         >
-                                                                                <option value="desc">Descending</option>
-                                                                                <option value="asc">Ascending</option>
-                                                                        </select>
+                                                                                <SelectTrigger className="w-[130px] bg-white border border-primary/50">
+                                                                                        <SelectValue placeholder="Order" />
+                                                                                </SelectTrigger>
+                                                                                <SelectContent>
+                                                                                        <SelectItem value="desc">
+                                                                                                Descending
+                                                                                        </SelectItem>
+                                                                                        <SelectItem value="asc">
+                                                                                                Ascending
+                                                                                        </SelectItem>
+                                                                                </SelectContent>
+                                                                        </Select>
                                                                 </div>
                                                         </div>
                                                         <div className="text-sm text-muted-foreground text-center sm:text-right">

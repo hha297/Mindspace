@@ -13,9 +13,6 @@ import {
         DropdownMenuItem,
         DropdownMenuTrigger,
         DropdownMenuSeparator,
-        DropdownMenuSub,
-        DropdownMenuSubContent,
-        DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
         Home,
@@ -26,10 +23,8 @@ import {
         X,
         LogOut,
         User,
-        Settings,
         ChevronDown,
         LayoutDashboardIcon,
-        Users,
         BotMessageSquare,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -193,70 +188,20 @@ export function Navbar() {
                                                                                 {session?.user.role === 'admin' && (
                                                                                         <>
                                                                                                 <DropdownMenuSeparator />
-                                                                                                <DropdownMenuSub>
-                                                                                                        <DropdownMenuSubTrigger className="flex items-center space-x-2 cursor-pointer">
-                                                                                                                <LayoutDashboardIcon className="h-4 w-4" />
+                                                                                                <DropdownMenuItem
+                                                                                                        asChild
+                                                                                                >
+                                                                                                        <Link
+                                                                                                                href="/admin"
+                                                                                                                className="flex items-center space-x-2 cursor-pointer"
+                                                                                                        >
+                                                                                                                <LayoutDashboardIcon className="h-4 w-4 hover:text-white" />
                                                                                                                 <span>
                                                                                                                         Admin
                                                                                                                         Dashboard
                                                                                                                 </span>
-                                                                                                        </DropdownMenuSubTrigger>
-                                                                                                        <DropdownMenuSubContent>
-                                                                                                                <DropdownMenuItem
-                                                                                                                        asChild
-                                                                                                                >
-                                                                                                                        <Link
-                                                                                                                                href="/admin"
-                                                                                                                                className="flex items-center space-x-2 cursor-pointer"
-                                                                                                                        >
-                                                                                                                                <LayoutDashboardIcon className="h-4 w-4 hover:text-white" />
-                                                                                                                                <span>
-                                                                                                                                        Overview
-                                                                                                                                </span>
-                                                                                                                        </Link>
-                                                                                                                </DropdownMenuItem>
-                                                                                                                <DropdownMenuItem
-                                                                                                                        asChild
-                                                                                                                >
-                                                                                                                        <Link
-                                                                                                                                href="/admin/users"
-                                                                                                                                className="flex items-center space-x-2 cursor-pointer"
-                                                                                                                        >
-                                                                                                                                <Users className="h-4 w-4 hover:text-white" />
-                                                                                                                                <span>
-                                                                                                                                        Users
-                                                                                                                                </span>
-                                                                                                                        </Link>
-                                                                                                                </DropdownMenuItem>
-                                                                                                                <DropdownMenuItem
-                                                                                                                        asChild
-                                                                                                                >
-                                                                                                                        <Link
-                                                                                                                                href="/admin/resources"
-                                                                                                                                className="flex items-center space-x-2 cursor-pointer"
-                                                                                                                        >
-                                                                                                                                <BookOpen className="h-4 w-4 hover:text-white" />
-                                                                                                                                <span>
-                                                                                                                                        Resources
-                                                                                                                                </span>
-                                                                                                                        </Link>
-                                                                                                                </DropdownMenuItem>
-
-                                                                                                                <DropdownMenuItem
-                                                                                                                        asChild
-                                                                                                                >
-                                                                                                                        <Link
-                                                                                                                                href="/admin/settings"
-                                                                                                                                className="flex items-center space-x-2 cursor-pointer"
-                                                                                                                        >
-                                                                                                                                <Settings className="h-4 w-4 hover:text-white" />
-                                                                                                                                <span>
-                                                                                                                                        Settings
-                                                                                                                                </span>
-                                                                                                                        </Link>
-                                                                                                                </DropdownMenuItem>
-                                                                                                        </DropdownMenuSubContent>
-                                                                                                </DropdownMenuSub>
+                                                                                                        </Link>
+                                                                                                </DropdownMenuItem>
                                                                                         </>
                                                                                 )}
 
@@ -346,32 +291,7 @@ export function Navbar() {
                                                                                 className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-muted-foreground hover:text-white hover:bg-primary rounded-md transition-colors"
                                                                         >
                                                                                 <LayoutDashboardIcon className="h-5 w-5" />
-                                                                                <span>Overview</span>
-                                                                        </Link>
-                                                                        <Link
-                                                                                href="/admin/users"
-                                                                                onClick={() => setIsMenuOpen(false)}
-                                                                                className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-muted-foreground hover:text-white hover:bg-primary rounded-md transition-colors"
-                                                                        >
-                                                                                <Users className="h-5 w-5" />
-                                                                                <span>Users</span>
-                                                                        </Link>
-                                                                        <Link
-                                                                                href="/admin/resources"
-                                                                                onClick={() => setIsMenuOpen(false)}
-                                                                                className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-muted-foreground hover:text-white hover:bg-primary rounded-md transition-colors"
-                                                                        >
-                                                                                <BookOpen className="h-5 w-5" />
-                                                                                <span>Resources</span>
-                                                                        </Link>
-
-                                                                        <Link
-                                                                                href="/admin/settings"
-                                                                                onClick={() => setIsMenuOpen(false)}
-                                                                                className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-muted-foreground hover:text-white hover:bg-primary rounded-md transition-colors"
-                                                                        >
-                                                                                <Settings className="h-5 w-5" />
-                                                                                <span>Settings</span>
+                                                                                <span>Admin Dashboard</span>
                                                                         </Link>
                                                                 </div>
                                                         )}
