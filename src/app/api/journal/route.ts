@@ -1,20 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { type NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { connectDB } from '@/lib/db';
-import User from '@/lib/models/User';
+import Journal from '@/lib/models/Journal';
 
-// Simple journal entry interface
-interface JournalEntry {
-        _id?: string;
-        userId: string;
-        title: string;
-        content: string;
-        prompt?: string;
-        createdAt: Date;
-        updatedAt: Date;
-}
-
-export async function GET() {
+// GET - Fetch user's journal entries
+export async function GET(request: NextRequest) {
         try {
                 const session = await getServerSession();
                 if (!session?.user?.email) {
@@ -23,22 +14,40 @@ export async function GET() {
 
                 await connectDB();
 
-                const user = await User.findOne({ email: session.user.email });
-                if (!user) {
-                        return NextResponse.json({ error: 'User not found' }, { status: 404 });
+                const { searchParams } = new URL(request.url);
+                const page = Number.parseInt(searchParams.get('page') || '1');
+                const limit = Number.parseInt(searchParams.get('limit') || '10');
+                const category = searchParams.get('category');
+
+                const filter: Record<string, any> = {
+                        userId: session.user.email,
+                };
+
+                if (category && category !== 'all') {
+                        filter.category = category;
                 }
 
-                // For now, return empty array since we don't have a Journal model yet
-                // This can be expanded when a proper Journal model is created
-                const entries: JournalEntry[] = [];
+                const [entries, totalEntries] = await Promise.all([
+                        Journal.find(filter)
+                                .sort({ createdAt: -1 })
+                                .skip((page - 1) * limit)
+                                .limit(limit),
+                        Journal.countDocuments(filter),
+                ]);
 
-                return NextResponse.json({ entries });
+                return NextResponse.json({
+                        entries,
+                        totalEntries,
+                        totalPages: Math.ceil(totalEntries / limit),
+                        currentPage: page,
+                });
         } catch (error) {
                 console.error('Error fetching journal entries:', error);
                 return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
         }
 }
 
+// POST - Create new journal entry
 export async function POST(request: NextRequest) {
         try {
                 const session = await getServerSession();
@@ -46,37 +55,30 @@ export async function POST(request: NextRequest) {
                         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
                 }
 
-                const { title, content, prompt } = await request.json();
+                const { content, prompt, category, mood, tags, isPrivate } = await request.json();
 
-                if (!title || !content) {
-                        return NextResponse.json({ error: 'Title and content are required' }, { status: 400 });
+                if (!content || !content.trim()) {
+                        return NextResponse.json({ error: 'Content is required' }, { status: 400 });
                 }
 
                 await connectDB();
 
-                const user = await User.findOne({ email: session.user.email });
-                if (!user) {
-                        return NextResponse.json({ error: 'User not found' }, { status: 404 });
-                }
-
-                // For now, just return success since we don't have a Journal model
-                // This would create a journal entry when the model is implemented
-                const entry = {
-                        _id: new Date().getTime().toString(),
-                        userId: user._id.toString(),
-                        title,
-                        content,
-                        prompt: prompt || '',
-                        createdAt: new Date(),
-                        updatedAt: new Date(),
-                };
+                const journalEntry = await Journal.create({
+                        userId: session.user.email,
+                        content: content.trim(),
+                        prompt: prompt || undefined,
+                        category: category || 'free-write',
+                        mood: mood || undefined,
+                        tags: tags || [],
+                        isPrivate: isPrivate !== undefined ? isPrivate : true,
+                });
 
                 return NextResponse.json({
-                        entry,
-                        message: 'Journal entry saved successfully',
+                        message: 'Journal entry created successfully',
+                        entry: journalEntry,
                 });
         } catch (error) {
-                console.error('Error saving journal entry:', error);
-                return NextResponse.json({ error: 'Failed to save journal entry' }, { status: 500 });
+                console.error('Error creating journal entry:', error);
+                return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
         }
 }

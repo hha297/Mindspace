@@ -5,13 +5,14 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Users, BookOpen, Settings, ArrowLeft, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, BookOpen, Settings, ArrowLeft, Menu, X, PenTool } from 'lucide-react';
 import Image from 'next/image';
 
 const navigation = [
         { name: 'Overview', href: '/admin', icon: LayoutDashboard },
         { name: 'Users', href: '/admin/users', icon: Users },
         { name: 'Resources', href: '/admin/resources', icon: BookOpen },
+        { name: 'Journaling', href: '/admin/journaling', icon: PenTool },
         { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 

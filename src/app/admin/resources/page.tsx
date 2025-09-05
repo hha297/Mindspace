@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,6 +33,7 @@ import {
         Calendar,
         StarIcon,
         StarOffIcon,
+        Eye,
 } from 'lucide-react';
 import { DeleteDialog } from '@/components/delete-dialog';
 
@@ -72,6 +73,8 @@ export default function AdminResourcesPage() {
         const [resources, setResources] = useState<Resource[]>([]);
         const [isLoading, setIsLoading] = useState(true);
         const [isDialogOpen, setIsDialogOpen] = useState(false);
+        const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+        const [viewingResource, setViewingResource] = useState<Resource | null>(null);
         const [editingResource, setEditingResource] = useState<Resource | null>(null);
         const [formData, setFormData] = useState({
                 title: '',
@@ -163,6 +166,11 @@ export default function AdminResourcesPage() {
                         console.error('Error deleting resource:', error);
                         toast.error('Failed to delete resource');
                 }
+        };
+
+        const handleView = (resource: Resource) => {
+                setViewingResource(resource);
+                setIsViewDialogOpen(true);
         };
 
         const handleEdit = (resource: Resource) => {
@@ -501,6 +509,237 @@ export default function AdminResourcesPage() {
                                 </div>
                         </div>
 
+                        {/* View Resource Content Modal */}
+                        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+                                <DialogContent className="max-w-8xl max-h-[90vh] overflow-y-auto w-[95vw] md:w-[95vw]">
+                                        <DialogHeader>
+                                                <DialogTitle className="flex items-center space-x-2">
+                                                        <Eye className="h-5 w-5" />
+                                                        <span>Resource Content</span>
+                                                </DialogTitle>
+                                                <DialogDescription>
+                                                        View the detailed content of this mental health resource
+                                                </DialogDescription>
+                                        </DialogHeader>
+
+                                        {viewingResource && (
+                                                <div className="space-y-6">
+                                                        {/* Resource Header */}
+                                                        <div className="border-b pb-4">
+                                                                <div className="flex items-start justify-between">
+                                                                        <div className="flex-1">
+                                                                                <h2 className="text-2xl font-bold text-foreground mb-2">
+                                                                                        {viewingResource.title}
+                                                                                </h2>
+                                                                                <p className="text-muted-foreground mb-3">
+                                                                                        {viewingResource.description}{' '}
+                                                                                </p>
+                                                                                <div className="flex flex-wrap gap-2">
+                                                                                        <Badge
+                                                                                                variant="outline"
+                                                                                                className="capitalize"
+                                                                                        >
+                                                                                                {
+                                                                                                        viewingResource.category
+                                                                                                }
+                                                                                        </Badge>
+                                                                                        <Badge
+                                                                                                variant="secondary"
+                                                                                                className="capitalize"
+                                                                                        >
+                                                                                                {viewingResource.type}
+                                                                                        </Badge>
+                                                                                        {viewingResource.featured && (
+                                                                                                <Badge variant="default">
+                                                                                                        <StarIcon className="h-3 w-3 mr-1" />
+                                                                                                        Featured
+                                                                                                </Badge>
+                                                                                        )}
+                                                                                </div>
+                                                                        </div>
+                                                                        <div className="flex items-center space-x-2 ml-4">
+                                                                                {getTypeIcon(viewingResource.type) && (
+                                                                                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                                                                                                {React.createElement(
+                                                                                                        getTypeIcon(
+                                                                                                                viewingResource.type,
+                                                                                                        ),
+                                                                                                        {
+                                                                                                                className: 'h-6 w-6 text-primary',
+                                                                                                        },
+                                                                                                )}
+                                                                                        </div>
+                                                                                )}
+                                                                        </div>
+                                                                </div>
+                                                        </div>
+
+                                                        {/* Resource Content */}
+                                                        <div className="space-y-4">
+                                                                <h3 className="text-lg font-semibold">Content</h3>
+                                                                <div className="bg-muted/50 rounded-lg p-4">
+                                                                        {viewingResource.content ? (
+                                                                                <div className="prose prose-sm max-w-none">
+                                                                                        <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
+                                                                                                {
+                                                                                                        viewingResource.content
+                                                                                                }
+                                                                                        </pre>
+                                                                                </div>
+                                                                        ) : (
+                                                                                <p className="text-muted-foreground italic">
+                                                                                        No content available for this
+                                                                                        resource.
+                                                                                </p>
+                                                                        )}
+                                                                </div>
+                                                        </div>
+
+                                                        {/* Resource Details */}
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                <div>
+                                                                        <h4 className="font-medium mb-2">
+                                                                                Resource Information
+                                                                        </h4>
+                                                                        <div className="space-y-2 text-sm">
+                                                                                <div className="flex justify-between">
+                                                                                        <span className="text-muted-foreground">
+                                                                                                Type:
+                                                                                        </span>
+                                                                                        <span className="capitalize">
+                                                                                                {viewingResource.type}
+                                                                                        </span>
+                                                                                </div>
+                                                                                <div className="flex justify-between">
+                                                                                        <span className="text-muted-foreground">
+                                                                                                Category:
+                                                                                        </span>
+                                                                                        <span>
+                                                                                                {
+                                                                                                        viewingResource.category
+                                                                                                }
+                                                                                        </span>
+                                                                                </div>
+                                                                                <div className="flex justify-between">
+                                                                                        <span className="text-muted-foreground">
+                                                                                                Duration:
+                                                                                        </span>
+                                                                                        <span>
+                                                                                                {
+                                                                                                        viewingResource.duration
+                                                                                                }{' '}
+                                                                                                minutes
+                                                                                        </span>
+                                                                                </div>
+                                                                                <div className="flex justify-between">
+                                                                                        <span className="text-muted-foreground">
+                                                                                                Created:
+                                                                                        </span>
+                                                                                        <span>
+                                                                                                {format(
+                                                                                                        new Date(
+                                                                                                                viewingResource.createdAt,
+                                                                                                        ),
+                                                                                                        'MMM d, yyyy',
+                                                                                                )}
+                                                                                        </span>
+                                                                                </div>
+                                                                                <div className="flex justify-between">
+                                                                                        <span className="text-muted-foreground">
+                                                                                                Updated:
+                                                                                        </span>
+                                                                                        <span>
+                                                                                                {format(
+                                                                                                        new Date(
+                                                                                                                viewingResource.updatedAt,
+                                                                                                        ),
+                                                                                                        'MMM d, yyyy',
+                                                                                                )}
+                                                                                        </span>
+                                                                                </div>
+                                                                        </div>
+                                                                </div>
+
+                                                                <div>
+                                                                        <h4 className="font-medium mb-2">
+                                                                                Additional Details
+                                                                        </h4>
+                                                                        <div className="space-y-2 text-sm">
+                                                                                {viewingResource.url && (
+                                                                                        <div>
+                                                                                                <span className="text-muted-foreground">
+                                                                                                        External URL:
+                                                                                                </span>
+                                                                                                <a
+                                                                                                        href={
+                                                                                                                viewingResource.url
+                                                                                                        }
+                                                                                                        target="_blank"
+                                                                                                        rel="noopener noreferrer"
+                                                                                                        className="ml-2 text-blue-600 hover:text-blue-800 underline"
+                                                                                                >
+                                                                                                        {
+                                                                                                                viewingResource.url
+                                                                                                        }
+                                                                                                </a>
+                                                                                        </div>
+                                                                                )}
+                                                                                {viewingResource.tags &&
+                                                                                        viewingResource.tags.length >
+                                                                                                0 && (
+                                                                                                <div>
+                                                                                                        <span className="text-muted-foreground">
+                                                                                                                Tags:
+                                                                                                        </span>
+                                                                                                        <div className="flex flex-wrap gap-1 mt-1">
+                                                                                                                {viewingResource.tags.map(
+                                                                                                                        (
+                                                                                                                                tag,
+                                                                                                                                index,
+                                                                                                                        ) => (
+                                                                                                                                <Badge
+                                                                                                                                        key={
+                                                                                                                                                index
+                                                                                                                                        }
+                                                                                                                                        variant="outline"
+                                                                                                                                        className="text-xs"
+                                                                                                                                >
+                                                                                                                                        {
+                                                                                                                                                tag
+                                                                                                                                        }
+                                                                                                                                </Badge>
+                                                                                                                        ),
+                                                                                                                )}
+                                                                                                        </div>
+                                                                                                </div>
+                                                                                        )}
+                                                                        </div>
+                                                                </div>
+                                                        </div>
+
+                                                        {/* Action Buttons */}
+                                                        <div className="flex justify-end space-x-2 pt-4 border-t">
+                                                                <Button
+                                                                        variant="outline"
+                                                                        onClick={() => setIsViewDialogOpen(false)}
+                                                                >
+                                                                        Close
+                                                                </Button>
+                                                                <Button
+                                                                        onClick={() => {
+                                                                                setIsViewDialogOpen(false);
+                                                                                handleEdit(viewingResource);
+                                                                        }}
+                                                                >
+                                                                        <Edit className="h-4 w-4 mr-2" />
+                                                                        Edit Resource
+                                                                </Button>
+                                                        </div>
+                                                </div>
+                                        )}
+                                </DialogContent>
+                        </Dialog>
+
                         {/* Resources List - Mobile Card View */}
                         <div className="space-y-4 pb-8 md:hidden">
                                 <div className="flex items-center justify-between">
@@ -524,12 +763,12 @@ export default function AdminResourcesPage() {
                                                                                 <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
                                                                                         <TypeIcon className="h-5 w-5 text-primary" />
                                                                                 </div>
-                                                                                <div className="flex-1 min-w-0">
+                                                                                <div className="flex-1 min-w-0 max-w-[800px]">
                                                                                         <h3 className="font-medium text-sm truncate">
                                                                                                 {resource.title}
                                                                                         </h3>
                                                                                         <p className="text-xs text-muted-foreground truncate">
-                                                                                                {resource.description}
+                                                                                                {resource.description}{' '}
                                                                                         </p>
                                                                                 </div>
                                                                         </div>
@@ -599,17 +838,22 @@ export default function AdminResourcesPage() {
                                                                         <Button
                                                                                 variant="outline"
                                                                                 size="sm"
+                                                                                onClick={() => handleView(resource)}
+                                                                                className="flex-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                                        >
+                                                                                <Eye className="h-4 w-4" />
+                                                                        </Button>
+                                                                        <Button
+                                                                                variant="outline"
+                                                                                size="sm"
                                                                                 onClick={() => toggleFeatured(resource)}
                                                                                 className="flex-1"
                                                                         >
                                                                                 {resource.featured ? (
-                                                                                        <StarIcon className="h-3 w-3 mr-1" />
+                                                                                        <StarOffIcon className="h-4 w-4" />
                                                                                 ) : (
-                                                                                        <StarOffIcon className="h-3 w-3 mr-1" />
+                                                                                        <StarIcon className="h-4 w-4" />
                                                                                 )}
-                                                                                {resource.featured
-                                                                                        ? 'Unfeature'
-                                                                                        : 'Feature'}
                                                                         </Button>
                                                                         <Button
                                                                                 variant="outline"
@@ -617,8 +861,7 @@ export default function AdminResourcesPage() {
                                                                                 onClick={() => handleEdit(resource)}
                                                                                 className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                                                                         >
-                                                                                <Edit className="h-3 w-3 mr-1" />
-                                                                                Edit
+                                                                                <Edit className="h-4 w-4" />
                                                                         </Button>
                                                                         <DeleteDialog
                                                                                 title="Delete Resource"
@@ -632,8 +875,7 @@ export default function AdminResourcesPage() {
                                                                                                 size="sm"
                                                                                                 className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
                                                                                         >
-                                                                                                <Trash2 className="h-3 w-3 mr-1" />
-                                                                                                Delete
+                                                                                                <Trash2 className="h-4 w-4" />
                                                                                         </Button>
                                                                                 }
                                                                         />
@@ -657,12 +899,24 @@ export default function AdminResourcesPage() {
                                                 <Table>
                                                         <TableHeader>
                                                                 <TableRow>
-                                                                        <TableHead>Resource</TableHead>
-                                                                        <TableHead>Category</TableHead>
-                                                                        <TableHead>Type</TableHead>
-                                                                        <TableHead>Status</TableHead>
-                                                                        <TableHead>Created</TableHead>
-                                                                        <TableHead>Actions</TableHead>
+                                                                        <TableHead className="text-center">
+                                                                                Resource
+                                                                        </TableHead>
+                                                                        <TableHead className="text-center">
+                                                                                Category
+                                                                        </TableHead>
+                                                                        <TableHead className="text-center">
+                                                                                Type
+                                                                        </TableHead>
+                                                                        <TableHead className="text-center">
+                                                                                Status
+                                                                        </TableHead>
+                                                                        <TableHead className="text-center">
+                                                                                Created
+                                                                        </TableHead>
+                                                                        <TableHead className="text-center">
+                                                                                Actions
+                                                                        </TableHead>
                                                                 </TableRow>
                                                         </TableHeader>
                                                         <TableBody>
@@ -671,20 +925,20 @@ export default function AdminResourcesPage() {
                                                                         return (
                                                                                 <TableRow key={resource._id}>
                                                                                         <TableCell>
-                                                                                                <div className="space-y-2">
-                                                                                                        <div className="font-medium">
+                                                                                                <div className="space-y-2 max-w-[640px]">
+                                                                                                        <div className="font-medium truncate">
                                                                                                                 {
                                                                                                                         resource.title
                                                                                                                 }
                                                                                                         </div>
-                                                                                                        <div className="text-sm text-muted-foreground line-clamp-1">
+                                                                                                        <div className="text-sm text-muted-foreground truncate">
                                                                                                                 {
                                                                                                                         resource.description
                                                                                                                 }
                                                                                                         </div>
                                                                                                 </div>
                                                                                         </TableCell>
-                                                                                        <TableCell>
+                                                                                        <TableCell className="text-center">
                                                                                                 <Badge
                                                                                                         variant="outline"
                                                                                                         className="capitalize"
@@ -695,7 +949,7 @@ export default function AdminResourcesPage() {
                                                                                                 </Badge>
                                                                                         </TableCell>
                                                                                         <TableCell>
-                                                                                                <div className="flex items-center space-x-2">
+                                                                                                <div className="flex items-center justify-center space-x-2">
                                                                                                         <TypeIcon className="h-4 w-4" />
                                                                                                         <span className="capitalize">
                                                                                                                 {
@@ -705,7 +959,7 @@ export default function AdminResourcesPage() {
                                                                                                 </div>
                                                                                         </TableCell>
                                                                                         <TableCell>
-                                                                                                <div className="flex items-center space-x-2">
+                                                                                                <div className="flex items-center justify-center space-x-2">
                                                                                                         {resource.featured ? (
                                                                                                                 <StarIcon className="h-4 w-4 text-green-600" />
                                                                                                         ) : (
@@ -725,7 +979,7 @@ export default function AdminResourcesPage() {
                                                                                                 </div>
                                                                                         </TableCell>
                                                                                         <TableCell>
-                                                                                                <div className="text-sm text-muted-foreground">
+                                                                                                <div className="text-sm text-center text-muted-foreground">
                                                                                                         {format(
                                                                                                                 new Date(
                                                                                                                         resource.createdAt,
@@ -735,7 +989,19 @@ export default function AdminResourcesPage() {
                                                                                                 </div>
                                                                                         </TableCell>
                                                                                         <TableCell>
-                                                                                                <div className="flex items-center space-x-2">
+                                                                                                <div className="flex items-center justify-center space-x-2">
+                                                                                                        <Button
+                                                                                                                variant="outline"
+                                                                                                                size="sm"
+                                                                                                                onClick={() =>
+                                                                                                                        handleView(
+                                                                                                                                resource,
+                                                                                                                        )
+                                                                                                                }
+                                                                                                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                                                                        >
+                                                                                                                <Eye className="h-4 w-4" />
+                                                                                                        </Button>
                                                                                                         <Button
                                                                                                                 variant="outline"
                                                                                                                 size="sm"

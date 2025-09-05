@@ -33,10 +33,18 @@ export default function SignInPage() {
         // Show loading while checking authentication
         if (status === 'loading') {
                 return (
-                        <div className="min-h-screen bg-background flex items-center justify-center">
+                        <div
+                                className="min-h-screen flex items-center justify-center"
+                                style={{
+                                        backgroundImage: 'url(/wallpaper/wallpaper1.jpg)',
+                                        backgroundSize: 'cover',
+                                        backgroundPosition: 'center',
+                                        backgroundRepeat: 'no-repeat',
+                                }}
+                        >
                                 <div className="text-center">
                                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                                        <p className="text-muted-foreground">Loading...</p>
+                                        <p className="text-white">Loading...</p>
                                 </div>
                         </div>
                 );
@@ -109,13 +117,21 @@ export default function SignInPage() {
         };
 
         return (
-                <div className="min-h-screen p-8 bg-background flex flex-col">
-                        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-                                <div className="max-w-md w-full space-y-8">
+                <div
+                        className="min-h-screen p-4 sm:p-8 flex flex-col"
+                        style={{
+                                backgroundImage: 'url(/wallpaper/wallpaper1.jpg)',
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                backgroundRepeat: 'no-repeat',
+                        }}
+                >
+                        <div className="flex-1 flex items-center justify-center sm:px-6 lg:px-8">
+                                <div className="max-w-md w-full space-y-6 sm:space-y-8">
                                         <div className="text-center">
                                                 <Link href="/" className="inline-flex items-center space-x-2 mb-8">
                                                         <Image src="/logo.png" alt="MindSpace" width={32} height={32} />
-                                                        <span className="font-semibold text-2xl text-foreground">
+                                                        <span className="font-semibold text-2xl text-white">
                                                                 MindSpace
                                                         </span>
                                                 </Link>
@@ -242,19 +258,6 @@ export default function SignInPage() {
                                                         </div>
                                                 </CardContent>
                                         </Card>
-
-                                        <div className="text-center text-xs text-muted-foreground">
-                                                <p>
-                                                        By signing in, you agree to our{' '}
-                                                        <Link href="/privacy" className="text-primary hover:underline">
-                                                                Privacy Policy
-                                                        </Link>{' '}
-                                                        and{' '}
-                                                        <Link href="/terms" className="text-primary hover:underline">
-                                                                Terms of Service
-                                                        </Link>
-                                                </p>
-                                        </div>
                                 </div>
                         </div>
                 </div>

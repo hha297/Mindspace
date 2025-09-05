@@ -93,8 +93,29 @@ export function JournalingTool() {
                 setIsSaving(true);
 
                 try {
+                        // Save to database
+                        const response = await fetch('/api/journal', {
+                                method: 'POST',
+                                headers: {
+                                        'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                        content: journalEntry,
+                                        prompt: selectedPrompt?.prompt || null,
+                                        category: selectedPrompt?.category || 'free-write',
+                                        isPrivate: true,
+                                }),
+                        });
+
+                        if (!response.ok) {
+                                throw new Error('Failed to save to database');
+                        }
+
+                        const data = await response.json();
+
+                        // Also save to localStorage for immediate display
                         const entry = {
-                                id: Date.now().toString(),
+                                id: data.entry._id,
                                 content: journalEntry,
                                 prompt: selectedPrompt?.prompt || null,
                                 category: selectedPrompt?.category || 'free-write',
@@ -106,7 +127,7 @@ export function JournalingTool() {
                         localStorage.setItem('journal-entries', JSON.stringify(updatedEntries));
 
                         toast.success('Entry saved!', {
-                                description: 'Your journal entry has been saved locally.',
+                                description: 'Your journal entry has been saved successfully.',
                         });
 
                         // Clear the form
