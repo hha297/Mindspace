@@ -28,10 +28,11 @@ export function CategoryFilter({
         return (
                 <div className="mb-8">
                         <h2 className="text-lg font-semibold mb-4">Filter by Category</h2>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
                                 <Button
                                         variant={selectedCategory === null && !showFeaturedOnly ? 'default' : 'outline'}
                                         size="sm"
+                                        className="w-full sm:w-auto justify-center"
                                         onClick={() => {
                                                 onCategorySelect(null);
                                                 if (showFeaturedOnly) onFeaturedToggle();
@@ -42,6 +43,7 @@ export function CategoryFilter({
                                 <Button
                                         variant={showFeaturedOnly ? 'default' : 'outline'}
                                         size="sm"
+                                        className="w-full sm:w-auto justify-center"
                                         onClick={() => {
                                                 onFeaturedToggle();
                                                 if (selectedCategory) onCategorySelect(null);
@@ -61,6 +63,7 @@ export function CategoryFilter({
                                                                 : 'outline'
                                                 }
                                                 size="sm"
+                                                className="w-full sm:w-auto justify-center"
                                                 onClick={() => {
                                                         onCategorySelect(category.name);
                                                         if (showFeaturedOnly) onFeaturedToggle();
