@@ -84,18 +84,6 @@ We believe that mental health support should be accessible, personalized, and st
 
 ---
 
-## ✨ Features
-
-<div align="center">
-
-|         🔐 Authentication         |    💾 Data Management     |          🖼️ Media & AI          |       🎨 UI/UX Design       |
-| :-------------------------------: | :-----------------------: | :-----------------------------: | :-------------------------: |
-| Secure OAuth with GitHub & Google | MongoDB with Mongoose ODM |  Cloudinary image optimization  | Tailwind CSS styling system |
-|    NextAuth.js implementation     |   CRUD operations ready   |   OpenAI-powered chat support   | shadcn/ui component library |
-|    Environment-based security     |  Scalable NoSQL storage   | Automatic image transformations |  Lucide React icon system   |
-
-</div>
-
 ### 🌟 Key Highlights
 
 - **🔒 Security First** — Environment variables for sensitive credentials
