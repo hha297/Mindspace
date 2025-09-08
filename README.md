@@ -12,6 +12,7 @@
 - [🚀 Key Features](#-key-features)
 - [✨ Features](#-features)
 - [🛠 Tech Stack](#-tech-stack)
+- [🏗️ System Architecture](#️-system-architecture)
 - [🔑 Environment Variables](#-environment-variables)
 - [🚀 Getting Started](#-getting-started)
 - [📦 Deployment](#-deployment)
@@ -119,6 +120,63 @@ We believe that mental health support should be accessible, personalized, and st
 ![ESLint](https://img.shields.io/badge/ESLint-purple?style=for-the-badge&logo=eslint&logoColor=white)
 
 </div>
+
+---
+
+## 🏗️ System Architecture
+
+```
+mindspace/
+├── src/
+│   ├── app/                           # Next.js App Router
+│   │   ├── admin/                     # Admin Dashboard
+│   │   │   ├── journaling/           # Admin journaling management
+│   │   │   ├── quizzes/              # Admin quiz management
+│   │   │   ├── resources/            # Admin resource management
+│   │   │   ├── settings/             # Admin settings
+│   │   │   ├── users/                # User management
+│   │   │   ├── layout.tsx            # Admin layout
+│   │   │   └── page.tsx              # Admin dashboard
+│   │   ├── api/                      # API Routes
+│   │   │   ├── admin/                # Admin API endpoints
+│   │   │   ├── auth/                 # Authentication
+│   │   │   ├── chat/                 # AI Chat system
+│   │   │   ├── journal/              # Journal CRUD
+│   │   │   ├── mood/                 # Mood tracking CRUD
+│   │   │   ├── resources/             # Resource management
+│   │   │   ├── stress-assessment/    # Stress assessment API
+│   │   │   ├── upload/               # File upload
+│   │   │   └── user/                 # User management
+│   │   ├── chat/                     # Chat page
+│   │   ├── dashboard/                # User dashboard
+│   │   ├── profile/                  # User profile
+│   │   ├── resources/                 # Resources page
+│   │   ├── sign-in/                  # Sign in page
+│   │   ├── sign-up/                  # Sign up page
+│   │   ├── tools/                    # Self-help tools
+│   │   ├── globals.css               # Global styles
+│   │   ├── layout.tsx                # Root layout
+│   │   └── page.tsx                  # Home page
+│   ├── components/                    # Reusable UI components
+│   │   ├── admin/                    # Admin-specific components
+│   │   ├── chat/                     # Chat components
+│   │   ├── dashboard/                # Dashboard components
+│   │   ├── profile/                  # Profile components
+│   │   ├── resources/                # Resource components
+│   │   └── ui/                       # Shadcn/ui components
+│   ├── hooks/                         # Custom React hooks
+│   │   └── use-mobile.ts              # Mobile detection hook
+│   ├── lib/                           # Utility functions
+│   │   ├── models/                    # Mongoose schemas
+│   │   ├── stress-quiz-data.ts        # Stress quiz data
+│   │   ├── db.ts                      # MongoDB connection
+│   │   └── utils.ts                   # Helper functions
+│   └── types/                         # TypeScript type definitions
+│       └── next-auth.d.ts             # NextAuth type extensions
+├── public/                            # Static assets
+├── middleware.ts                      # Route protection
+└── package.json                       # Dependencies
+```
 
 ---
 
