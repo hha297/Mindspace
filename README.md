@@ -130,40 +130,40 @@ mindspace/
 ├── src/
 │   ├── app/                           # Next.js App Router
 │   │   ├── admin/                     # Admin Dashboard
-│   │   │   ├── journaling/           # Admin journaling management
-│   │   │   ├── quizzes/              # Admin quiz management
-│   │   │   ├── resources/            # Admin resource management
-│   │   │   ├── settings/             # Admin settings
-│   │   │   ├── users/                # User management
-│   │   │   ├── layout.tsx            # Admin layout
-│   │   │   └── page.tsx              # Admin dashboard
-│   │   ├── api/                      # API Routes
-│   │   │   ├── admin/                # Admin API endpoints
-│   │   │   ├── auth/                 # Authentication
-│   │   │   ├── chat/                 # AI Chat system
-│   │   │   ├── journal/              # Journal CRUD
-│   │   │   ├── mood/                 # Mood tracking CRUD
+│   │   │   ├── journaling/            # Admin journaling management
+│   │   │   ├── quizzes/               # Admin quiz management
+│   │   │   ├── resources/             # Admin resource management
+│   │   │   ├── settings/              # Admin settings
+│   │   │   ├── users/                 # User management
+│   │   │   ├── layout.tsx             # Admin layout
+│   │   │   └── page.tsx               # Admin dashboard
+│   │   ├── api/                       # API Routes
+│   │   │   ├── admin/                 # Admin API endpoints
+│   │   │   ├── auth/                  # Authentication
+│   │   │   ├── chat/                  # AI Chat system
+│   │   │   ├── journal/               # Journal CRUD
+│   │   │   ├── mood/                  # Mood tracking CRUD
 │   │   │   ├── resources/             # Resource management
-│   │   │   ├── stress-assessment/    # Stress assessment API
-│   │   │   ├── upload/               # File upload
-│   │   │   └── user/                 # User management
-│   │   ├── chat/                     # Chat page
-│   │   ├── dashboard/                # User dashboard
-│   │   ├── profile/                  # User profile
+│   │   │   ├── stress-assessment/     # Stress assessment API
+│   │   │   ├── upload/                # File upload
+│   │   │   └── user/                  # User management
+│   │   ├── chat/                      # Chat page
+│   │   ├── dashboard/                 # User dashboard
+│   │   ├── profile/                   # User profile
 │   │   ├── resources/                 # Resources page
-│   │   ├── sign-in/                  # Sign in page
-│   │   ├── sign-up/                  # Sign up page
-│   │   ├── tools/                    # Self-help tools
-│   │   ├── globals.css               # Global styles
-│   │   ├── layout.tsx                # Root layout
-│   │   └── page.tsx                  # Home page
+│   │   ├── sign-in/                   # Sign in page
+│   │   ├── sign-up/                   # Sign up page
+│   │   ├── tools/                     # Self-help tools
+│   │   ├── globals.css                # Global styles
+│   │   ├── layout.tsx                 # Root layout
+│   │   └── page.tsx                   # Home page
 │   ├── components/                    # Reusable UI components
-│   │   ├── admin/                    # Admin-specific components
-│   │   ├── chat/                     # Chat components
-│   │   ├── dashboard/                # Dashboard components
-│   │   ├── profile/                  # Profile components
-│   │   ├── resources/                # Resource components
-│   │   └── ui/                       # Shadcn/ui components
+│   │   ├── admin/                     # Admin-specific components
+│   │   ├── chat/                      # Chat components
+│   │   ├── dashboard/                 # Dashboard components
+│   │   ├── profile/                   # Profile components
+│   │   ├── resources/                 # Resource components
+│   │   └── ui/                        # Shadcn/ui components
 │   ├── hooks/                         # Custom React hooks
 │   │   └── use-mobile.ts              # Mobile detection hook
 │   ├── lib/                           # Utility functions
